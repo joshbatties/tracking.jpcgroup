@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #trackingResult {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #trackingResult h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Container Tracking</h1>
+    <form id="trackingForm">
+        <label for="containerNumber">Container Number:</label>
+        <input type="text" id="containerNumber" name="containerNumber" required>
+        
+        <label for="bookingNumber">Booking Number:</label>
+        <input type="text" id="bookingNumber" name="bookingNumber" required>
+        
+        <label for="blNumber">Bill of Lading Number:</label>
+        <input type="text" id="blNumber" name="blNumber" required>
+        
+        <button type="submit">Track Shipment</button>
+    </form>
+    <div id="trackingResult"></div>
+
+    <script>
+        function fetchTrackingInfo(containerNumber, bookingNumber, blNumber) {
+            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkDs6aIbB2a4acdPJZ3t_0ZQcKwrDZyQbdpImZaF7JK644zL4yPcB_k06Revw3skUHISd6JSMISP5e/pub?gid=0&single=true&output=csv';
+            
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    console.log("Raw response:", data);
+                    
+                    const rows = data.split('\n').map(row => row.split(','));
+                    console.log("Parsed rows:", rows);
+                    
+                    if (rows.length < 2) {
+                        throw new Error("No data found in the spreadsheet");
+                    }
+                    
+                    const headers = rows[0];
+                    console.log("Headers:", headers);
+                    
+                    const shipment = rows.slice(1).find(row => 
+                        row[headers.indexOf('Container Number')] === containerNumber &&
+                        row[headers.indexOf('Booking Number')] === bookingNumber &&
+                        row[headers.indexOf('B/L Number')] === blNumber
+                    );
+                    
+                    if (shipment) {
+                        console.log("Found shipment:", shipment);
+                        displayTrackingInfo(shipment, headers);
+                    } else {
+                        document.getElementById('trackingResult').innerHTML = 'Shipment not found.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching tracking information:', error);
+                    document.getElementById('trackingResult').innerHTML = `Error fetching tracking information: ${error.message}`;
+                });
+        }
+
+        function displayTrackingInfo(shipment, headers) {
+            console.log("Displaying info for shipment:", shipment, "with headers:", headers);
+            
+            const getShipmentInfo = (columnName) => {
+                const index = headers.indexOf(columnName);
+                return index !== -1 && shipment[index] ? shipment[index] : 'N/A';
+            };
+
+            const status = getShipmentInfo('Status');
+            const location = getShipmentInfo('Location');
+            const eta = getShipmentInfo('ETA');
+            
+            const resultHTML = `
+                <h2>Tracking Information</h2>
+                <p><strong>Status:</strong> ${status}</p>
+                <p><strong>Current Location:</strong> ${location}</p>
+                <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
+            `;
+            
+            document.getElementById('trackingResult').innerHTML = resultHTML;
+        }
+
+        document.getElementById('trackingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const containerNumber = document.getElementById('containerNumber').value;
+            const bookingNumber = document.getElementById('bookingNumber').value;
+            const blNumber = document.getElementById('blNumber').value;
+            
+            fetchTrackingInfo(containerNumber, bookingNumber, blNumber);
+        });
+    </script>
+</body>
+</html>
