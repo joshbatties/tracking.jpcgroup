@@ -6,67 +6,118 @@
     <title>Container Tracking</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #2c3e50;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #ecf0f1;
         }
         h1 {
-            color: #2c3e50;
+            color: #2980b9;
             text-align: center;
+            margin-bottom: 30px;
         }
         form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
         }
         input[type="text"] {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
             box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #2980b9;
+            outline: none;
         }
         button {
-            background-color: #3498db;
+            background-color: #2980b9;
             color: #fff;
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
+            width: 100%;
+            transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #1f6391;
         }
         #trackingResult {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         #trackingResult h2 {
-            color: #2c3e50;
+            color: #2980b9;
             margin-top: 0;
+            margin-bottom: 20px;
+        }
+        #loadingIndicator {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        /* Spinner Styles */
+        .spinner {
+            margin: 0 auto;
+            width: 50px;
+            height: 50px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #2980b9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Error Message Styles */
+        #inputError {
+            display: none;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            form, #trackingResult {
+                padding: 20px;
+            }
+            button {
+                font-size: 16px;
+            }
         }
     </style>
+    <!-- Include Papa Parse from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
     <h1>Container Tracking</h1>
-    <form id="trackingForm">
+    <!-- Error message div -->
+    <div id="inputError"></div>
+    <form id="trackingForm" aria-label="Container Tracking Form">
         <label for="containerNumber">Container Number:</label>
-        <input type="text" id="containerNumber" name="containerNumber" required>
+        <input type="text" id="containerNumber" name="containerNumber" required autofocus>
         
         <label for="bookingNumber">Booking Number:</label>
         <input type="text" id="bookingNumber" name="bookingNumber" required>
@@ -76,74 +127,150 @@
         
         <button type="submit">Track Shipment</button>
     </form>
-    <div id="trackingResult"></div>
+    <div id="loadingIndicator">
+        <div class="spinner"></div>
+    </div>
+    <div id="trackingResult" aria-live="polite"></div>
 
     <script>
+        /**
+         * Escapes HTML special characters to prevent XSS attacks
+         * @param {string} str - The string to escape
+         * @returns {string} - The escaped string
+         */
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(match) {
+                const escapeChars = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return escapeChars[match];
+            });
+        }
+
+        /**
+         * Normalizes strings for comparison by trimming and converting to lowercase
+         * @param {string} str - The string to normalize
+         * @returns {string} - The normalized string
+         */
+        function normalizeString(str) {
+            return str ? str.trim().toLowerCase() : '';
+        }
+
+        /**
+         * Validates user input to ensure it meets expected alphanumeric format
+         * @param {string} value - The value to validate
+         * @returns {boolean} - True if valid, false otherwise
+         */
+        function isValidInput(value) {
+            const pattern = /^[a-zA-Z0-9\-]+$/; // Adjust the pattern as needed
+            return pattern.test(value.trim());
+        }
+
+        /**
+         * Displays an error message in the inputError div
+         * @param {string} message - The error message to display
+         */
+        function displayInputError(message) {
+            const errorDiv = document.getElementById('inputError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        /**
+         * Hides the inputError div
+         */
+        function hideInputError() {
+            const errorDiv = document.getElementById('inputError');
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+        }
+
+        /**
+         * Fetches tracking information based on user input
+         * @param {string} containerNumber - The container number entered by the user
+         * @param {string} bookingNumber - The booking number entered by the user
+         * @param {string} blNumber - The bill of lading number entered by the user
+         */
         function fetchTrackingInfo(containerNumber, bookingNumber, blNumber) {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('trackingResult').innerHTML = '';
+            hideInputError();
+
             const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkDs6aIbB2a4acdPJZ3t_0ZQcKwrDZyQbdpImZaF7JK644zL4yPcB_k06Revw3skUHISd6JSMISP5e/pub?gid=0&single=true&output=csv';
-            
-            fetch(url)
-                .then(response => response.text())
-                .then(data => {
-                    console.log("Raw response:", data);
-                    
-                    const rows = data.split('\n').map(row => row.split(','));
-                    console.log("Parsed rows:", rows);
-                    
-                    if (rows.length < 2) {
-                        throw new Error("No data found in the spreadsheet");
+
+            Papa.parse(url, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    const rows = results.data;
+                    const headers = results.meta.fields;
+
+                    // Validate required headers
+                    const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'Location', 'ETA'];
+                    const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
+                    if (missingHeaders.length > 0) {
+                        console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
+                        document.getElementById('trackingResult').innerHTML = 'Data format error. Please contact support.';
+                        return;
                     }
-                    
-                    const headers = rows[0];
-                    console.log("Headers:", headers);
-                    
-                    const shipment = rows.slice(1).find(row => 
-                        row[headers.indexOf('Container Number')] === containerNumber &&
-                        row[headers.indexOf('Booking Number')] === bookingNumber &&
-                        row[headers.indexOf('B/L Number')] === blNumber
+
+                    const shipment = rows.find(row => 
+                        normalizeString(row['Container Number']) === normalizeString(containerNumber) &&
+                        normalizeString(row['Booking Number']) === normalizeString(bookingNumber) &&
+                        normalizeString(row['B/L Number']) === normalizeString(blNumber)
                     );
-                    
+
                     if (shipment) {
-                        console.log("Found shipment:", shipment);
-                        displayTrackingInfo(shipment, headers);
+                        displayTrackingInfo(shipment);
+                        document.getElementById('trackingForm').reset();
                     } else {
                         document.getElementById('trackingResult').innerHTML = 'Shipment not found.';
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching tracking information:', error);
-                    document.getElementById('trackingResult').innerHTML = `Error fetching tracking information: ${error.message}`;
-                });
+                },
+                error: function(err) {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    console.error('Error parsing CSV:', err);
+                    document.getElementById('trackingResult').innerHTML = 'An error occurred while fetching tracking information. Please try again later.';
+                }
+            });
         }
 
-        function displayTrackingInfo(shipment, headers) {
-            console.log("Displaying info for shipment:", shipment, "with headers:", headers);
-            
-            const getShipmentInfo = (columnName) => {
-                const index = headers.indexOf(columnName);
-                return index !== -1 && shipment[index] ? shipment[index] : 'N/A';
-            };
+        /**
+         * Displays the tracking information of the shipment
+         * @param {Object} shipment - The shipment data object
+         */
+        function displayTrackingInfo(shipment) {
+            const status = escapeHTML(shipment['Status'] || 'N/A');
+            const location = escapeHTML(shipment['Location'] || 'N/A');
+            const eta = escapeHTML(shipment['ETA'] || 'N/A');
 
-            const status = getShipmentInfo('Status');
-            const location = getShipmentInfo('Location');
-            const eta = getShipmentInfo('ETA');
-            
             const resultHTML = `
                 <h2>Tracking Information</h2>
                 <p><strong>Status:</strong> ${status}</p>
                 <p><strong>Current Location:</strong> ${location}</p>
                 <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
             `;
-            
             document.getElementById('trackingResult').innerHTML = resultHTML;
         }
 
+        // Event listener for form submission
         document.getElementById('trackingForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const containerNumber = document.getElementById('containerNumber').value;
             const bookingNumber = document.getElementById('bookingNumber').value;
             const blNumber = document.getElementById('blNumber').value;
-            
+
+            if (!isValidInput(containerNumber) || !isValidInput(bookingNumber) || !isValidInput(blNumber)) {
+                displayInputError('Please enter valid alphanumeric values.');
+                return;
+            }
+
             fetchTrackingInfo(containerNumber, bookingNumber, blNumber);
         });
     </script>
