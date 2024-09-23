@@ -43,11 +43,12 @@ function hideLoadingIndicator(type) {
 function fetchTrackingInfo(trackingNumber, customerCode) {
     if (trackingNumber) {
         showLoadingIndicator('tracking');
+        document.getElementById('trackingResult').innerHTML = '';
     } else if (customerCode) {
         showLoadingIndicator('customer');
+        document.getElementById('customerResult').innerHTML = '';
     }
 
-    document.getElementById('trackingResult').innerHTML = '';
     document.getElementById('customerSummary').innerHTML = '';
     document.getElementById('pagination').innerHTML = '';
     hideInputError();
@@ -84,7 +85,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
                     displayCustomerSummary(allShipments);
                     displayShipments(1);
                 } else {
-                    document.getElementById('trackingResult').innerHTML = 'No shipments found for this customer code.';
+                    document.getElementById('customerResult').innerHTML = 'No shipments found for this customer code.';
                 }
             } else if (trackingNumber) {
                 const shipments = rows.filter(row => {
@@ -107,7 +108,8 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
                 hideLoadingIndicator('customer');
             }
             console.error('Error parsing CSV:', err);
-            document.getElementById('trackingResult').innerHTML = 'An error occurred while fetching tracking information. Please try again later.';
+            const errorElement = trackingNumber ? 'trackingResult' : 'customerResult';
+            document.getElementById(errorElement).innerHTML = 'An error occurred while fetching tracking information. Please try again later.';
         }
     });
 }
@@ -175,7 +177,7 @@ function displayShipments(page) {
 
     resultHTML += '</table>';
 
-    document.getElementById('trackingResult').innerHTML = resultHTML;
+    document.getElementById('customerResult').innerHTML = resultHTML;
 
     displayPagination();
 }

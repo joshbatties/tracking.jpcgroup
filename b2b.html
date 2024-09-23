@@ -215,8 +215,11 @@ h1 {
             <p>Search individual shipments or containers.</p>
             <input type="text" id="trackingNumber" name="trackingNumber">
             <button type="button" id="trackShipmentBtn">Track Shipment</button>
-            <div id="trackingLoadingIndicator" class="loadingIndicator">
-                <div class="spinner"></div>
+            <div id="trackingResultContainer">
+                <div id="trackingLoadingIndicator" class="loadingIndicator">
+                    <div class="spinner"></div>
+                </div>
+                <div id="trackingResult"></div>
             </div>
         </div>
     
@@ -227,16 +230,17 @@ h1 {
             <p>Search all your shipments.</p>
             <input type="text" id="customerCode" name="customerCode">
             <button type="button" id="searchCustomerBtn">Search</button>
-            <div id="customerLoadingIndicator" class="loadingIndicator">
-                <div class="spinner"></div>
+            <div id="customerResultContainer">
+                <div id="customerLoadingIndicator" class="loadingIndicator">
+                    <div class="spinner"></div>
+                </div>
+                <div id="customerResult"></div>
             </div>
         </div>
     </form>
     
     <div id="customerSummary"></div>
-    <div id="trackingResult" aria-live="polite"></div>
     <div id="pagination"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script src="script.js"></script>
 </body>
