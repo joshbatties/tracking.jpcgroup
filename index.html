@@ -195,7 +195,7 @@
          * @param {string} bookingNumber - The booking number entered by the user
          * @param {string} blNumber - The bill of lading number entered by the user
          */
-        function fetchTrackingInfo(containerNumber, bookingNumber, blNumber) {
+         function fetchTrackingInfo(containerNumber, bookingNumber, blNumber) {
             document.getElementById('loadingIndicator').style.display = 'block';
             document.getElementById('trackingResult').innerHTML = '';
             hideInputError();
@@ -211,8 +211,8 @@
                     const rows = results.data;
                     const headers = results.meta.fields;
 
-                    // Validate required headers
-                    const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'Location', 'ETA'];
+                    // Validate required headers (updated to include ETD)
+                    const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'Location', 'ETD', 'ETA'];
                     const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
                     if (missingHeaders.length > 0) {
                         console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
@@ -245,20 +245,21 @@
          * Displays the tracking information of the shipment
          * @param {Object} shipment - The shipment data object
          */
-        function displayTrackingInfo(shipment) {
+         function displayTrackingInfo(shipment) {
             const status = escapeHTML(shipment['Status'] || 'N/A');
             const location = escapeHTML(shipment['Location'] || 'N/A');
+            const etd = escapeHTML(shipment['ETD'] || 'N/A');
             const eta = escapeHTML(shipment['ETA'] || 'N/A');
 
             const resultHTML = `
                 <h2>Tracking Information</h2>
                 <p><strong>Status:</strong> ${status}</p>
                 <p><strong>Current Location:</strong> ${location}</p>
+                <p><strong>Estimated Time of Departure:</strong> ${etd}</p>
                 <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
             `;
             document.getElementById('trackingResult').innerHTML = resultHTML;
         }
-
         // Event listener for form submission
         document.getElementById('trackingForm').addEventListener('submit', function(e) {
             e.preventDefault();
