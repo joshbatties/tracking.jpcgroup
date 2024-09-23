@@ -33,7 +33,7 @@
             margin-bottom: 8px;
             font-weight: bold;
             color: #2980b9;
-            font-size: 1.25rem;
+            font-size: 1.35rem;
         }
         .input-description {
             font-size: 0.9em;
@@ -156,10 +156,29 @@ th, td {
     text-align: left;
     word-break: break-word; /* Allow long content to break */
 }
+
+header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#jpc-logo {
+    height: 4em; /* This makes the logo height match the text height */
+    margin-right: 15px; /* Adds some space between the logo and the text */
+}
+
+h1 {
+    color: #2980b9;
+    margin: 0; /* Removes default margins */
+}
     </style>
 </head>
 <body>
-    <h1>Container Tracking</h1>
+    <header>
+        <img src="images/jpc_logo.png" alt="JPC Logo" id="jpc-logo">
+        <h1>Container Tracking</h1>
+    </header>
     <div id="inputError"></div>
     <form id="trackingForm" aria-label="Container Tracking Form">
         <div>

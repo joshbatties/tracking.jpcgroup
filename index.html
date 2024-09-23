@@ -117,10 +117,29 @@
                 font-size: 16px;
             }
         }
+
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #jpc-logo {
+            margin-right: 15px; /* Adds some space between the logo and the text */
+        }
+
+        h1 {
+            color: #2980b9;
+            margin: 0; /* Removes default margins */
+        }
     </style>
 </head>
 <body>
-    <h1>Container Tracking</h1>
+    <header>
+        <img src="images/jpc_logo.png" alt="JPC Logo" id="jpc-logo">
+        <h1>Container Tracking</h1>
+    </header>
     <div id="inputError"></div>
     <form id="trackingForm" aria-label="Container Tracking Form">
         <label for="trackingNumber">Enter Container, Booking, or B/L Number:</label>
