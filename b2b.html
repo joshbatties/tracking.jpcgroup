@@ -14,12 +14,11 @@
             padding: 20px;
             background-color: #ecf0f1;
         }
-        h1 {
+        h1, h2 {
             color: #2980b9;
             text-align: center;
-            margin-bottom: 30px;
         }
-        form {
+        form, #trackingResult, #customerSummary {
             background-color: #ffffff;
             padding: 25px;
             border-radius: 10px;
@@ -68,23 +67,11 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            width: 100%;
             transition: background-color 0.3s;
             margin-top: 10px;
         }
         button:hover {
             background-color: #1f6391;
-        }
-        #trackingResult {
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        #trackingResult h2 {
-            color: #2980b9;
-            margin-top: 0;
-            margin-bottom: 20px;
         }
         #loadingIndicator {
             display: none;
@@ -110,24 +97,43 @@
             margin-bottom: 20px;
             font-weight: bold;
         }
-        .container-info {
+        .container-info, .shipment-info {
             background-color: #f0f0f0;
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 10px;
             margin-bottom: 10px;
         }
-        .shipment-info {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #bdc3c7;
-            padding-bottom: 20px;
+        #pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #pagination button {
+            margin: 0 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
         @media (max-width: 600px) {
             body {
                 padding: 10px;
             }
-            form, #trackingResult {
-                padding: 20px;
+            form, #trackingResult, #customerSummary {
+                padding: 15px;
             }
         }
     </style>
@@ -136,29 +142,33 @@
     <h1>Container Tracking</h1>
     <div id="inputError"></div>
     <form id="trackingForm" aria-label="Container Tracking Form">
-        <div class="form-section">
+        <div>
             <label for="trackingNumber">Enter Container, Booking, or B/L Number:</label>
-            <p class="input-description">Search individual shipments or containers.</p>
+            <p>Search individual shipments or containers.</p>
             <input type="text" id="trackingNumber" name="trackingNumber">
             <button type="button" id="trackShipmentBtn">Track Shipment</button>
         </div>
 
-        <div class="separator">OR</div>
+        <p>OR</p>
 
-        <div class="form-section">
+        <div>
             <label for="customerCode">Customer Code:</label>
-            <p class="input-description">Search all your shipments.</p>
+            <p>Search all your shipments.</p>
             <input type="text" id="customerCode" name="customerCode">
-            <button type="button" id="searchCustomerBtn">Search All</button>
+            <button type="button" id="searchCustomerBtn">Search Customer Shipments</button>
         </div>
     </form>
-    <div id="loadingIndicator">
-        <div class="spinner"></div>
-    </div>
+    <div id="loadingIndicator" style="display: none;">Loading...</div>
+    <div id="customerSummary"></div>
     <div id="trackingResult" aria-live="polite"></div>
+    <div id="pagination"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script>
+        let allShipments = [];
+        const itemsPerPage = 10;
+        let currentPage = 1;
+
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, function(match) {
                 const escapeChars = {
@@ -192,6 +202,8 @@
         function fetchTrackingInfo(trackingNumber, customerCode) {
             document.getElementById('loadingIndicator').style.display = 'block';
             document.getElementById('trackingResult').innerHTML = '';
+            document.getElementById('customerSummary').innerHTML = '';
+            document.getElementById('pagination').innerHTML = '';
             hideInputError();
 
             const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkDs6aIbB2a4acdPJZ3t_0ZQcKwrDZyQbdpImZaF7JK644zL4yPcB_k06Revw3skUHISd6JSMISP5e/pub?gid=0&single=true&output=csv';
@@ -213,25 +225,28 @@
                         return;
                     }
 
-                    let shipments = rows;
-
                     if (customerCode) {
-                        shipments = rows.filter(row => 
+                        allShipments = rows.filter(row => 
                             normalizeString(row['Customer Code']) === normalizeString(customerCode)
                         );
+                        if (allShipments.length > 0) {
+                            displayCustomerSummary(allShipments);
+                            displayShipments(1);
+                        } else {
+                            document.getElementById('trackingResult').innerHTML = 'No shipments found for this customer code.';
+                        }
                     } else if (trackingNumber) {
-                        shipments = rows.filter(row => {
+                        const shipments = rows.filter(row => {
                             const containerNumbers = normalizeString(row['Container Number']).split(',').map(cn => cn.trim());
                             return containerNumbers.includes(normalizeString(trackingNumber)) ||
                                    normalizeString(row['Booking Number']) === normalizeString(trackingNumber) ||
                                    normalizeString(row['B/L Number']) === normalizeString(trackingNumber);
                         });
-                    }
-
-                    if (shipments.length > 0) {
-                        displayTrackingInfo(shipments, trackingNumber, customerCode);
-                    } else {
-                        document.getElementById('trackingResult').innerHTML = 'No matching shipments found.';
+                        if (shipments.length > 0) {
+                            displayTrackingInfo(shipments, trackingNumber);
+                        } else {
+                            document.getElementById('trackingResult').innerHTML = 'No matching shipments found.';
+                        }
                     }
                 },
                 error: function(err) {
@@ -242,7 +257,86 @@
             });
         }
 
-        function displayTrackingInfo(shipments, searchedNumber, customerCode) {
+        function displayCustomerSummary(shipments) {
+            const totalShipments = shipments.length;
+            const uniqueContainers = new Set(shipments.flatMap(s => s['Container Number'].split(',').map(c => c.trim()))).size;
+            const statusCounts = shipments.reduce((acc, s) => {
+                acc[s.Status] = (acc[s.Status] || 0) + 1;
+                return acc;
+            }, {});
+
+            let summaryHTML = `
+                <h2>Customer Shipment Summary</h2>
+                <p>Total Shipments: ${totalShipments}</p>
+                <p>Total Containers: ${uniqueContainers}</p>
+                <h3>Status Breakdown:</h3>
+                <ul>
+            `;
+            for (const [status, count] of Object.entries(statusCounts)) {
+                summaryHTML += `<li>${escapeHTML(status)}: ${count}</li>`;
+            }
+            summaryHTML += '</ul>';
+
+            document.getElementById('customerSummary').innerHTML = summaryHTML;
+        }
+
+        function displayShipments(page) {
+            currentPage = page;
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageShipments = allShipments.slice(start, end);
+
+            let resultHTML = `
+                <h2>Shipments (Page ${page})</h2>
+                <table>
+                    <tr>
+                        <th>Booking Number</th>
+                        <th>B/L Number</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>ETD</th>
+                        <th>ETA</th>
+                    </tr>
+            `;
+
+            pageShipments.forEach(shipment => {
+                resultHTML += `
+                    <tr>
+                        <td>${escapeHTML(shipment['Booking Number'] || 'N/A')}</td>
+                        <td>${escapeHTML(shipment['B/L Number'] || 'N/A')}</td>
+                        <td>${escapeHTML(shipment['Status'] || 'N/A')}</td>
+                        <td>${escapeHTML(shipment['Location'] || 'N/A')}</td>
+                        <td>${escapeHTML(shipment['ETD'] || 'N/A')}</td>
+                        <td>${escapeHTML(shipment['ETA'] || 'N/A')}</td>
+                    </tr>
+                `;
+            });
+
+            resultHTML += '</table>';
+
+            document.getElementById('trackingResult').innerHTML = resultHTML;
+
+            displayPagination();
+        }
+
+        function displayPagination() {
+            const totalPages = Math.ceil(allShipments.length / itemsPerPage);
+            let paginationHTML = '';
+
+            if (currentPage > 1) {
+                paginationHTML += `<button onclick="displayShipments(${currentPage - 1})">Previous</button>`;
+            }
+
+            paginationHTML += `<span>Page ${currentPage} of ${totalPages}</span>`;
+
+            if (currentPage < totalPages) {
+                paginationHTML += `<button onclick="displayShipments(${currentPage + 1})">Next</button>`;
+            }
+
+            document.getElementById('pagination').innerHTML = paginationHTML;
+        }
+
+        function displayTrackingInfo(shipments, searchedNumber) {
             let resultHTML = '<h2>Tracking Information</h2>';
 
             shipments.forEach(shipment => {
@@ -255,7 +349,7 @@
                 const customerCodeDisplay = escapeHTML(shipment['Customer Code'] || 'N/A');
 
                 resultHTML += `
-                    <div class="shipment-info">
+                    <div>
                         <p><strong>Customer Code:</strong> ${customerCodeDisplay}</p>
                         <p><strong>Booking Number:</strong> ${bookingNumber}</p>
                         <p><strong>Bill of Lading Number:</strong> ${blNumber}</p>
@@ -271,15 +365,9 @@
                     const trimmedContainerNumber = containerNumber.trim();
                     const isSearchedContainer = normalizeString(trimmedContainerNumber) === normalizeString(searchedNumber);
                     
-                    if (!customerCode && (isSearchedContainer || normalizeString(searchedNumber) === normalizeString(bookingNumber) || normalizeString(searchedNumber) === normalizeString(blNumber))) {
+                    if (isSearchedContainer || normalizeString(searchedNumber) === normalizeString(bookingNumber) || normalizeString(searchedNumber) === normalizeString(blNumber)) {
                         resultHTML += `
-                            <div class="container-info">
-                                <p><strong>Container Number:</strong> ${escapeHTML(trimmedContainerNumber)}</p>
-                            </div>
-                        `;
-                    } else if (customerCode) {
-                        resultHTML += `
-                            <div class="container-info">
+                            <div>
                                 <p><strong>Container Number:</strong> ${escapeHTML(trimmedContainerNumber)}</p>
                             </div>
                         `;
