@@ -260,22 +260,27 @@
         function displayCustomerSummary(shipments) {
             const totalShipments = shipments.length;
             const uniqueContainers = new Set(shipments.flatMap(s => s['Container Number'].split(',').map(c => c.trim()))).size;
-            const statusCounts = shipments.reduce((acc, s) => {
-                acc[s.Status] = (acc[s.Status] || 0) + 1;
-                return acc;
-            }, {});
+
+            // Sort shipments by ETD in descending order (most recent first)
+            shipments.sort((a, b) => new Date(b.ETD) - new Date(a.ETD));
+            const mostRecentShipment = shipments[0];
 
             let summaryHTML = `
-                <h2>Customer Shipment Summary</h2>
+                <h2>Summary</h2>
+                <h3>Recent:</h3>
+                <div>
+                    <p><strong>Booking Number:</strong> ${escapeHTML(mostRecentShipment['Booking Number'] || 'N/A')}</p>
+                    <p><strong>B/L Number:</strong> ${escapeHTML(mostRecentShipment['B/L Number'] || 'N/A')}</p>
+                    <p><strong>Status:</strong> ${escapeHTML(mostRecentShipment['Status'] || 'N/A')}</p>
+                    <p><strong>Current Location:</strong> ${escapeHTML(mostRecentShipment['Location'] || 'N/A')}</p>
+                    <p><strong>ETD:</strong> ${escapeHTML(mostRecentShipment['ETD'] || 'N/A')}</p>
+                    <p><strong>ETA:</strong> ${escapeHTML(mostRecentShipment['ETA'] || 'N/A')}</p>
+                    <p><strong>Container Numbers:</strong> ${escapeHTML(mostRecentShipment['Container Number'] || 'N/A')}</p>
+                </div>
+                <h3>Totals:</h3>
                 <p>Total Shipments: ${totalShipments}</p>
                 <p>Total Containers: ${uniqueContainers}</p>
-                <h3>Status Breakdown:</h3>
-                <ul>
             `;
-            for (const [status, count] of Object.entries(statusCounts)) {
-                summaryHTML += `<li>${escapeHTML(status)}: ${count}</li>`;
-            }
-            summaryHTML += '</ul>';
 
             document.getElementById('customerSummary').innerHTML = summaryHTML;
         }
@@ -287,7 +292,7 @@
             const pageShipments = allShipments.slice(start, end);
 
             let resultHTML = `
-                <h2>Shipments (Page ${page})</h2>
+                <h2>All Shipments (Page ${page})</h2>
                 <table>
                     <tr>
                         <th>Booking Number</th>
