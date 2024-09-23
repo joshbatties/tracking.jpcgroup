@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Container Tracking</title>
+    <title>JPC Container Tracking</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -14,27 +14,36 @@
             padding: 20px;
             background-color: #ecf0f1;
         }
-        h1 {
+        h1, h2 {
             color: #2980b9;
             text-align: center;
-            margin-bottom: 30px;
         }
-        form {
+        form, #trackingResult, #customerSummary {
             background-color: #ffffff;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+        .form-section {
+            margin-bottom: 20px;
+        }
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
+            color: #2980b9;
+            font-size: 1.35rem;
+        }
+        .input-description {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
         }
         input[type="text"] {
             width: 100%;
             padding: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             border: 2px solid #bdc3c7;
             border-radius: 5px;
             box-sizing: border-box;
@@ -45,6 +54,12 @@
             border-color: #2980b9;
             outline: none;
         }
+        .separator {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
         button {
             background-color: #2980b9;
             color: #fff;
@@ -52,23 +67,12 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 18px;
-            width: 100%;
+            font-size: 16px;
             transition: background-color 0.3s;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #1f6391;
-        }
-        #trackingResult {
-            background-color: #ffffff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        #trackingResult h2 {
-            color: #2980b9;
-            margin-top: 0;
-            margin-bottom: 20px;
         }
         #loadingIndicator {
             display: none;
@@ -94,45 +98,109 @@
             margin-bottom: 20px;
             font-weight: bold;
         }
-        .container-info {
+        .container-info, .shipment-info {
             background-color: #f0f0f0;
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 10px;
             margin-bottom: 10px;
         }
-        .shipment-info {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #bdc3c7;
-            padding-bottom: 20px;
+        #pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #pagination button {
+            margin: 0 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
         @media (max-width: 600px) {
             body {
                 padding: 10px;
             }
-            form, #trackingResult {
-                padding: 20px;
-            }
-            button {
-                font-size: 16px;
+            form, #trackingResult, #customerSummary {
+                padding: 15px;
             }
         }
 
-        header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+        #customerSummary:empty,
+#trackingResult:empty,
+#pagination:empty {
+    display: none;
+}
 
-        #jpc-logo {
-            margin-right: 15px; /* Adds some space between the logo and the text */
-        }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px; /* Reduce font size if needed */
+}
 
-        h1 {
-            color: #2980b9;
-            margin: 0; /* Removes default margins */
-        }
+th, td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+    word-break: break-word; /* Allow long content to break */
+}
+
+header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#jpc-logo {
+    height: 4em; /* This makes the logo height match the text height */
+    margin-right: 15px; /* Adds some space between the logo and the text */
+}
+
+h1 {
+    color: #2980b9;
+    margin: 0; /* Removes default margins */
+}
+
+.separator {
+    text-align: center;
+    margin: 30px 0;
+    font-weight: bold;
+    color: #7f8c8d;
+    font-size: 1.5em;
+}
+
+.loadingIndicator {
+    display: none;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.spinner {
+    border: 4px solid rgba(41, 128, 185, 0.3); /* Light blue */
+    border-top: 4px solid #2980b9; /* Solid blue */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
     </style>
 </head>
 <body>
@@ -142,144 +210,38 @@
     </header>
     <div id="inputError"></div>
     <form id="trackingForm" aria-label="Container Tracking Form">
-        <label for="trackingNumber">Enter Container, Booking, or B/L Number:</label>
-        <input type="text" id="trackingNumber" name="trackingNumber" required autofocus>
-        <button type="submit">Track Shipment</button>
+        <div>
+            <label for="trackingNumber">Enter Container, Booking, or B/L Number:</label>
+            <p>Search individual shipments or containers.</p>
+            <input type="text" id="trackingNumber" name="trackingNumber">
+            <button type="button" id="trackShipmentBtn">Track Shipment</button>
+            <div id="trackingResultContainer">
+                <div id="trackingLoadingIndicator" class="loadingIndicator">
+                    <div class="spinner"></div>
+                </div>
+                <div id="trackingResult"></div>
+            </div>
+        </div>
+    
+        <div class="separator">OR</div>
+    
+        <div>
+            <label for="customerCode">Customer Code:</label>
+            <p>Search all your shipments.</p>
+            <input type="text" id="customerCode" name="customerCode">
+            <button type="button" id="searchCustomerBtn">Search</button>
+            <div id="customerResultContainer">
+                <div id="customerLoadingIndicator" class="loadingIndicator">
+                    <div class="spinner"></div>
+                </div>
+                <div id="customerResult"></div>
+            </div>
+        </div>
     </form>
-    <div id="loadingIndicator">
-        <div class="spinner"></div>
-    </div>
-    <div id="trackingResult" aria-live="polite"></div>
-
+    
+    <div id="customerSummary"></div>
+    <div id="pagination"></div>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <script>
-        function escapeHTML(str) {
-            return str.replace(/[&<>"']/g, function(match) {
-                const escapeChars = {
-                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-                };
-                return escapeChars[match];
-            });
-        }
-
-        function normalizeString(str) {
-            return str ? str.trim().toLowerCase() : '';
-        }
-
-        function isValidInput(value) {
-            const pattern = /^[a-zA-Z0-9\-]+$/;
-            return pattern.test(value.trim());
-        }
-
-        function displayInputError(message) {
-            const errorDiv = document.getElementById('inputError');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        function hideInputError() {
-            const errorDiv = document.getElementById('inputError');
-            errorDiv.style.display = 'none';
-            errorDiv.textContent = '';
-        }
-
-        function fetchTrackingInfo(trackingNumber) {
-            document.getElementById('loadingIndicator').style.display = 'block';
-            document.getElementById('trackingResult').innerHTML = '';
-            hideInputError();
-
-            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkDs6aIbB2a4acdPJZ3t_0ZQcKwrDZyQbdpImZaF7JK644zL4yPcB_k06Revw3skUHISd6JSMISP5e/pub?gid=0&single=true&output=csv';
-
-            Papa.parse(url, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    document.getElementById('loadingIndicator').style.display = 'none';
-                    const rows = results.data;
-                    const headers = results.meta.fields;
-
-                    const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'Location', 'ETD', 'ETA'];
-                    const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
-                    if (missingHeaders.length > 0) {
-                        console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
-                        document.getElementById('trackingResult').innerHTML = 'Data format error. Please contact support.';
-                        return;
-                    }
-
-                    const shipments = rows.filter(row => {
-                        const containerNumbers = normalizeString(row['Container Number']).split(',').map(cn => cn.trim());
-                        return containerNumbers.includes(normalizeString(trackingNumber)) ||
-                               normalizeString(row['Booking Number']) === normalizeString(trackingNumber) ||
-                               normalizeString(row['B/L Number']) === normalizeString(trackingNumber);
-                    });
-
-                    if (shipments.length > 0) {
-                        displayTrackingInfo(shipments, trackingNumber);
-                        document.getElementById('trackingForm').reset();
-                    } else {
-                        document.getElementById('trackingResult').innerHTML = 'Shipment not found.';
-                    }
-                },
-                error: function(err) {
-                    document.getElementById('loadingIndicator').style.display = 'none';
-                    console.error('Error parsing CSV:', err);
-                    document.getElementById('trackingResult').innerHTML = 'An error occurred while fetching tracking information. Please try again later.';
-                }
-            });
-        }
-
-        function displayTrackingInfo(shipments, searchedNumber) {
-            let resultHTML = '<h2>Tracking Information</h2>';
-
-            shipments.forEach(shipment => {
-                const bookingNumber = escapeHTML(shipment['Booking Number'] || 'N/A');
-                const blNumber = escapeHTML(shipment['B/L Number'] || 'N/A');
-                const status = escapeHTML(shipment['Status'] || 'N/A');
-                const location = escapeHTML(shipment['Location'] || 'N/A');
-                const etd = escapeHTML(shipment['ETD'] || 'N/A');
-                const eta = escapeHTML(shipment['ETA'] || 'N/A');
-
-                resultHTML += `
-                    <div class="shipment-info">
-                        <p><strong>Booking Number:</strong> ${bookingNumber}</p>
-                        <p><strong>Bill of Lading Number:</strong> ${blNumber}</p>
-                        <p><strong>Status:</strong> ${status}</p>
-                        <p><strong>Current Location:</strong> ${location}</p>
-                        <p><strong>Estimated Time of Departure:</strong> ${etd}</p>
-                        <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
-                    </div>
-                `;
-
-                const containerNumbers = shipment['Container Number'].split(',');
-                containerNumbers.forEach(containerNumber => {
-                    const trimmedContainerNumber = containerNumber.trim();
-                    const isSearchedContainer = normalizeString(trimmedContainerNumber) === normalizeString(searchedNumber);
-                    
-                    if (isSearchedContainer || normalizeString(searchedNumber) === normalizeString(bookingNumber) || normalizeString(searchedNumber) === normalizeString(blNumber)) {
-                        resultHTML += `
-                            <div class="container-info">
-                                <p><strong>Container Number:</strong> ${escapeHTML(trimmedContainerNumber)}</p>
-                            </div>
-                        `;
-                    }
-                });
-            });
-
-            document.getElementById('trackingResult').innerHTML = resultHTML;
-        }
-
-        document.getElementById('trackingForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const trackingNumber = document.getElementById('trackingNumber').value;
-
-            if (!isValidInput(trackingNumber)) {
-                displayInputError('Please enter a valid alphanumeric value.');
-                return;
-            }
-
-            fetchTrackingInfo(trackingNumber);
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
