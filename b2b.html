@@ -136,6 +136,25 @@
                 padding: 15px;
             }
         }
+
+        #customerSummary:empty,
+#trackingResult:empty,
+#pagination:empty {
+    display: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px; /* Reduce font size if needed */
+}
+
+th, td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+    word-break: break-word; /* Allow long content to break */
+}
     </style>
 </head>
 <body>
@@ -297,6 +316,7 @@
                     <tr>
                         <th>Booking Number</th>
                         <th>B/L Number</th>
+                        <th>Container Numbers</th>
                         <th>Status</th>
                         <th>Location</th>
                         <th>ETD</th>
@@ -309,6 +329,7 @@
                     <tr>
                         <td>${escapeHTML(shipment['Booking Number'] || 'N/A')}</td>
                         <td>${escapeHTML(shipment['B/L Number'] || 'N/A')}</td>
+                        <td>${shipment['Container Number'].split(',').map(cn => escapeHTML(cn.trim())).join('<br>')}</td>
                         <td>${escapeHTML(shipment['Status'] || 'N/A')}</td>
                         <td>${escapeHTML(shipment['Location'] || 'N/A')}</td>
                         <td>${escapeHTML(shipment['ETD'] || 'N/A')}</td>
@@ -353,6 +374,11 @@
                 const eta = escapeHTML(shipment['ETA'] || 'N/A');
                 const customerCodeDisplay = escapeHTML(shipment['Customer Code'] || 'N/A');
 
+                // Process container numbers
+                const containerNumbers = shipment['Container Number'].split(',').map(cn => cn.trim());
+                const containerLabel = containerNumbers.length > 1 ? "Container/s" : "Container";
+                const containerDisplay = containerNumbers.join(', ');
+
                 resultHTML += `
                     <div>
                         <p><strong>Customer Code:</strong> ${customerCodeDisplay}</p>
@@ -362,22 +388,9 @@
                         <p><strong>Current Location:</strong> ${location}</p>
                         <p><strong>Estimated Time of Departure:</strong> ${etd}</p>
                         <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
+                        <p><strong>${containerLabel}:</strong> ${escapeHTML(containerDisplay)}</p>
                     </div>
                 `;
-
-                const containerNumbers = shipment['Container Number'].split(',');
-                containerNumbers.forEach(containerNumber => {
-                    const trimmedContainerNumber = containerNumber.trim();
-                    const isSearchedContainer = normalizeString(trimmedContainerNumber) === normalizeString(searchedNumber);
-                    
-                    if (isSearchedContainer || normalizeString(searchedNumber) === normalizeString(bookingNumber) || normalizeString(searchedNumber) === normalizeString(blNumber)) {
-                        resultHTML += `
-                            <div>
-                                <p><strong>Container Number:</strong> ${escapeHTML(trimmedContainerNumber)}</p>
-                            </div>
-                        `;
-                    }
-                });
             });
 
             document.getElementById('trackingResult').innerHTML = resultHTML;
