@@ -69,7 +69,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
             const rows = results.data;
             const headers = results.meta.fields;
 
-            const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'Location', 'ETD', 'ETA', 'Customer Code'];
+            const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'POD', 'ETD', 'ETA', 'Customer Code'];
             const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
             if (missingHeaders.length > 0) {
                 console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
@@ -114,33 +114,6 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
     });
 }
 
-function displayCustomerSummary(shipments) {
-    const totalShipments = shipments.length;
-    const uniqueContainers = new Set(shipments.flatMap(s => s['Container Number'].split(',').map(c => c.trim()))).size;
-
-    shipments.sort((a, b) => new Date(b.ETD) - new Date(a.ETD));
-    const mostRecentShipment = shipments[0];
-
-    let summaryHTML = `
-        <h2>Summary</h2>
-        <h3>Recent:</h3>
-        <div>
-            <p><strong>Booking Number:</strong> ${escapeHTML(mostRecentShipment['Booking Number'] || 'N/A')}</p>
-            <p><strong>B/L Number:</strong> ${escapeHTML(mostRecentShipment['B/L Number'] || 'N/A')}</p>
-            <p><strong>Status:</strong> ${escapeHTML(mostRecentShipment['Status'] || 'N/A')}</p>
-            <p><strong>Current Location:</strong> ${escapeHTML(mostRecentShipment['Location'] || 'N/A')}</p>
-            <p><strong>ETD:</strong> ${escapeHTML(mostRecentShipment['ETD'] || 'N/A')}</p>
-            <p><strong>ETA:</strong> ${escapeHTML(mostRecentShipment['ETA'] || 'N/A')}</p>
-            <p><strong>Container Numbers:</strong> ${escapeHTML(mostRecentShipment['Container Number'] || 'N/A')}</p>
-        </div>
-        <h3>Totals:</h3>
-        <p>Total Shipments: ${totalShipments}</p>
-        <p>Total Containers: ${uniqueContainers}</p>
-    `;
-
-    document.getElementById('customerSummary').innerHTML = summaryHTML;
-}
-
 function displayShipments(page) {
     currentPage = page;
     const start = (page - 1) * itemsPerPage;
@@ -155,7 +128,7 @@ function displayShipments(page) {
                 <th>B/L Number</th>
                 <th>Container Numbers</th>
                 <th>Status</th>
-                <th>Location</th>
+                <th>POD</th>
                 <th>ETD</th>
                 <th>ETA</th>
             </tr>
@@ -168,7 +141,7 @@ function displayShipments(page) {
                 <td>${escapeHTML(shipment['B/L Number'] || 'N/A')}</td>
                 <td>${shipment['Container Number'].split(',').map(cn => escapeHTML(cn.trim())).join('<br>')}</td>
                 <td>${escapeHTML(shipment['Status'] || 'N/A')}</td>
-                <td>${escapeHTML(shipment['Location'] || 'N/A')}</td>
+                <td>${escapeHTML(shipment['POD'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['ETD'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['ETA'] || 'N/A')}</td>
             </tr>
@@ -206,7 +179,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
         const bookingNumber = escapeHTML(shipment['Booking Number'] || 'N/A');
         const blNumber = escapeHTML(shipment['B/L Number'] || 'N/A');
         const status = escapeHTML(shipment['Status'] || 'N/A');
-        const location = escapeHTML(shipment['Location'] || 'N/A');
+        const pod = escapeHTML(shipment['POD'] || 'N/A');
         const etd = escapeHTML(shipment['ETD'] || 'N/A');
         const eta = escapeHTML(shipment['ETA'] || 'N/A');
         const customerCodeDisplay = escapeHTML(shipment['Customer Code'] || 'N/A');
@@ -221,7 +194,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
                 <p><strong>Booking Number:</strong> ${bookingNumber}</p>
                 <p><strong>Bill of Lading Number:</strong> ${blNumber}</p>
                 <p><strong>Status:</strong> ${status}</p>
-                <p><strong>Current Location:</strong> ${location}</p>
+                <p><strong>POD:</strong> ${pod}</p>
                 <p><strong>Estimated Time of Departure:</strong> ${etd}</p>
                 <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
                 <p><strong>${containerLabel}:</strong> ${escapeHTML(containerDisplay)}</p>
