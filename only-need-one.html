@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Tracking</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ecf0f1;
+        }
+        h1 {
+            color: #2980b9;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        form {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #2980b9;
+            outline: none;
+        }
+        button {
+            background-color: #2980b9;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1f6391;
+        }
+        #trackingResult {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #trackingResult h2 {
+            color: #2980b9;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        #loadingIndicator {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        /* Spinner Styles */
+        .spinner {
+            margin: 0 auto;
+            width: 50px;
+            height: 50px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #2980b9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Error Message Styles */
+        #inputError {
+            display: none;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            form, #trackingResult {
+                padding: 20px;
+            }
+            button {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <!-- Include Papa Parse from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+    <h1>Container Tracking</h1>
+    <!-- Error message div -->
+    <div id="inputError"></div>
+    <form id="trackingForm" aria-label="Container Tracking Form">
+        <label for="trackingNumber">Enter Container, Booking, or B/L Number:</label>
+        <input type="text" id="trackingNumber" name="trackingNumber" required autofocus>
+        
+        <button type="submit">Track Shipment</button>
+    </form>
+    <div id="loadingIndicator">
+        <div class="spinner"></div>
+    </div>
+    <div id="trackingResult" aria-live="polite"></div>
+
+    <script>
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(match) {
+                const escapeChars = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                };
+                return escapeChars[match];
+            });
+        }
+
+        function normalizeString(str) {
+            return str ? str.trim().toLowerCase() : '';
+        }
+
+        function isValidInput(value) {
+            const pattern = /^[a-zA-Z0-9\-]+$/;
+            return pattern.test(value.trim());
+        }
+
+        function displayInputError(message) {
+            const errorDiv = document.getElementById('inputError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideInputError() {
+            const errorDiv = document.getElementById('inputError');
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+        }
+
+        function fetchTrackingInfo(trackingNumber) {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('trackingResult').innerHTML = '';
+            hideInputError();
+
+            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkDs6aIbB2a4acdPJZ3t_0ZQcKwrDZyQbdpImZaF7JK644zL4yPcB_k06Revw3skUHISd6JSMISP5e/pub?gid=0&single=true&output=csv';
+
+            Papa.parse(url, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    const rows = results.data;
+                    const headers = results.meta.fields;
+
+                    const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'Location', 'ETD', 'ETA'];
+                    const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
+                    if (missingHeaders.length > 0) {
+                        console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
+                        document.getElementById('trackingResult').innerHTML = 'Data format error. Please contact support.';
+                        return;
+                    }
+
+                    const shipment = rows.find(row => 
+                        normalizeString(row['Container Number']) === normalizeString(trackingNumber) ||
+                        normalizeString(row['Booking Number']) === normalizeString(trackingNumber) ||
+                        normalizeString(row['B/L Number']) === normalizeString(trackingNumber)
+                    );
+
+                    if (shipment) {
+                        displayTrackingInfo(shipment);
+                        document.getElementById('trackingForm').reset();
+                    } else {
+                        document.getElementById('trackingResult').innerHTML = 'Shipment not found.';
+                    }
+                },
+                error: function(err) {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    console.error('Error parsing CSV:', err);
+                    document.getElementById('trackingResult').innerHTML = 'An error occurred while fetching tracking information. Please try again later.';
+                }
+            });
+        }
+
+        function displayTrackingInfo(shipment) {
+            const containerNumber = escapeHTML(shipment['Container Number'] || 'N/A');
+            const bookingNumber = escapeHTML(shipment['Booking Number'] || 'N/A');
+            const blNumber = escapeHTML(shipment['B/L Number'] || 'N/A');
+            const status = escapeHTML(shipment['Status'] || 'N/A');
+            const location = escapeHTML(shipment['Location'] || 'N/A');
+            const etd = escapeHTML(shipment['ETD'] || 'N/A');
+            const eta = escapeHTML(shipment['ETA'] || 'N/A');
+
+            const resultHTML = `
+                <h2>Tracking Information</h2>
+                <p><strong>Container Number:</strong> ${containerNumber}</p>
+                <p><strong>Booking Number:</strong> ${bookingNumber}</p>
+                <p><strong>Bill of Lading Number:</strong> ${blNumber}</p>
+                <p><strong>Status:</strong> ${status}</p>
+                <p><strong>Current Location:</strong> ${location}</p>
+                <p><strong>Estimated Time of Departure:</strong> ${etd}</p>
+                <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
+            `;
+            document.getElementById('trackingResult').innerHTML = resultHTML;
+        }
+
+        document.getElementById('trackingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const trackingNumber = document.getElementById('trackingNumber').value;
+
+            if (!isValidInput(trackingNumber)) {
+                displayInputError('Please enter a valid alphanumeric value.');
+                return;
+            }
+
+            fetchTrackingInfo(trackingNumber);
+        });
+    </script>
+</body>
+</html>
