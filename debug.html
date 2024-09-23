@@ -115,34 +115,44 @@
             padding: 10px;
             margin-bottom: 10px;
         }
+        .container-info {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .debug-info {
+            background-color: #ffe6e6;
+            border: 1px solid #ffcccc;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
     </style>
     <!-- Include Papa Parse from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
     <h1>Container Tracking</h1>
-    <!-- Error message div -->
     <div id="inputError"></div>
     <form id="trackingForm" aria-label="Container Tracking Form">
         <label for="trackingNumber">Enter Container, Booking, or B/L Number:</label>
         <input type="text" id="trackingNumber" name="trackingNumber" required autofocus>
-        
         <button type="submit">Track Shipment</button>
     </form>
     <div id="loadingIndicator">
         <div class="spinner"></div>
     </div>
     <div id="trackingResult" aria-live="polite"></div>
+    <div id="debugInfo" class="debug-info"></div>
 
     <script>
         function escapeHTML(str) {
             return str.replace(/[&<>"']/g, function(match) {
                 const escapeChars = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#39;'
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
                 };
                 return escapeChars[match];
             });
@@ -172,6 +182,7 @@
         function fetchTrackingInfo(trackingNumber) {
             document.getElementById('loadingIndicator').style.display = 'block';
             document.getElementById('trackingResult').innerHTML = '';
+            document.getElementById('debugInfo').innerHTML = '';
             hideInputError();
 
             const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSkDs6aIbB2a4acdPJZ3t_0ZQcKwrDZyQbdpImZaF7JK644zL4yPcB_k06Revw3skUHISd6JSMISP5e/pub?gid=0&single=true&output=csv';
@@ -194,11 +205,17 @@
                     }
 
                     const shipments = rows.filter(row => {
-                        const containerNumbers = normalizeString(row['Container Number']).split(',');
+                        const containerNumbers = normalizeString(row['Container Number']).split(',').map(cn => cn.trim());
                         return containerNumbers.includes(normalizeString(trackingNumber)) ||
                                normalizeString(row['Booking Number']) === normalizeString(trackingNumber) ||
                                normalizeString(row['B/L Number']) === normalizeString(trackingNumber);
                     });
+
+                    // Debug information
+                    let debugInfo = `Searched for: ${trackingNumber}\n`;
+                    debugInfo += `Total rows: ${rows.length}\n`;
+                    debugInfo += `Matching shipments: ${shipments.length}\n`;
+                    document.getElementById('debugInfo').textContent = debugInfo;
 
                     if (shipments.length > 0) {
                         displayTrackingInfo(shipments, trackingNumber);
