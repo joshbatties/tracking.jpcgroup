@@ -137,6 +137,20 @@ function parseDate(dateString) {
     return { display: dateString, sortValue: new Date(0) }; // Invalid date, use epoch for sorting
 }
 
+const statusOrder = [
+    "Not ready to ship",
+    "Ready to ship",
+    "On board vessel",
+    "In transit",
+    "Arrived at POD",
+    "Delivered"
+];
+
+function getStatusSortIndex(status) {
+    const index = statusOrder.indexOf(status);
+    return index === -1 ? statusOrder.length : index; // Put unknown statuses at the end
+}
+
 function sortShipments(column) {
     if (column === currentSortColumn) {
         currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
@@ -149,7 +163,11 @@ function sortShipments(column) {
         let valueA = a[column] || '';
         let valueB = b[column] || '';
 
-        if (column === 'ETD' || column === 'ETA') {
+        if (column === 'Status') {
+            const indexA = getStatusSortIndex(valueA);
+            const indexB = getStatusSortIndex(valueB);
+            return currentSortOrder === 'asc' ? indexA - indexB : indexB - indexA;
+        } else if (column === 'ETD' || column === 'ETA') {
             const dateA = parseDate(valueA);
             const dateB = parseDate(valueB);
 
