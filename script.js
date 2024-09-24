@@ -1,6 +1,8 @@
 let allShipments = [];
 const itemsPerPage = 10;
 let currentPage = 1;
+let currentSortColumn = 'ETA';
+let currentSortOrder = 'desc';
 
 function escapeHTML(str) {
     return str.replace(/[&<>"']/g, function(match) {
@@ -84,12 +86,23 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
                 );
                 console.log(`Found ${allShipments.length} shipments for customer code ${customerCode}`);
                 if (allShipments.length > 0) {
+                    sortShipments('ETA'); // Initially sort by ETA
                     displayShipments(1);
                 } else {
                     document.getElementById('customerResult').innerHTML = 'No shipments found for this customer code.';
                 }
             } else if (trackingNumber) {
-                // ... (tracking number search code remains the same)
+                const shipments = rows.filter(row => {
+                    const containerNumbers = normalizeString(row['Container Number']).split(',').map(cn => cn.trim());
+                    return containerNumbers.includes(normalizeString(trackingNumber)) ||
+                           normalizeString(row['Booking Number']) === normalizeString(trackingNumber) ||
+                           normalizeString(row['PO Number']) === normalizeString(trackingNumber);
+                });
+                if (shipments.length > 0) {
+                    displayTrackingInfo(shipments, trackingNumber);
+                } else {
+                    document.getElementById('trackingResult').innerHTML = 'No matching shipments found.';
+                }
             }
         },
         error: function(err) {
@@ -105,6 +118,57 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
     });
 }
 
+function parseDate(dateString) {
+    if (dateString.toUpperCase() === 'TBA') {
+        return { display: 'TBA', sortValue: new Date(8640000000000000) }; // Max date for sorting
+    }
+    // Assuming date format is DD/MM/YYYY
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+        // Convert to Date object for sorting
+        const dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
+        if (!isNaN(dateObject)) {
+            return { 
+                display: dateString, // Keep original string for display
+                sortValue: dateObject // Use Date object for sorting
+            };
+        }
+    }
+    return { display: dateString, sortValue: new Date(0) }; // Invalid date, use epoch for sorting
+}
+
+function sortShipments(column) {
+    if (column === currentSortColumn) {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = column;
+        currentSortOrder = 'asc';
+    }
+
+    allShipments.sort((a, b) => {
+        let valueA = a[column] || '';
+        let valueB = b[column] || '';
+
+        if (column === 'ETD' || column === 'ETA') {
+            const dateA = parseDate(valueA);
+            const dateB = parseDate(valueB);
+
+            if (dateA.sortValue < dateB.sortValue) return currentSortOrder === 'asc' ? -1 : 1;
+            if (dateA.sortValue > dateB.sortValue) return currentSortOrder === 'asc' ? 1 : -1;
+            return 0;
+        } else {
+            valueA = valueA.toLowerCase();
+            valueB = valueB.toLowerCase();
+
+            if (valueA < valueB) return currentSortOrder === 'asc' ? -1 : 1;
+            if (valueA > valueB) return currentSortOrder === 'asc' ? 1 : -1;
+            return 0;
+        }
+    });
+
+    displayShipments(1);
+}
+
 function displayShipments(page) {
     currentPage = page;
     const start = (page - 1) * itemsPerPage;
@@ -115,14 +179,14 @@ function displayShipments(page) {
         <h2>All Shipments (Page ${page})</h2>
         <table>
             <tr>
-                <th>Booking Number</th>
-                <th>PO Number</th>
-                <th>Container Numbers</th>
-                <th>Status</th>
-                <th>POL</th>
-                <th>POD</th>
-                <th>ETD</th>
-                <th>ETA</th>
+                <th><button onclick="sortShipments('Booking Number')">Booking Number ${getSortIndicator('Booking Number')}</button></th>
+                <th><button onclick="sortShipments('PO Number')">PO Number ${getSortIndicator('PO Number')}</button></th>
+                <th><button onclick="sortShipments('Container Number')">Container Numbers ${getSortIndicator('Container Number')}</button></th>
+                <th><button onclick="sortShipments('Status')">Status ${getSortIndicator('Status')}</button></th>
+                <th><button onclick="sortShipments('POL')">POL ${getSortIndicator('POL')}</button></th>
+                <th><button onclick="sortShipments('POD')">POD ${getSortIndicator('POD')}</button></th>
+                <th><button onclick="sortShipments('ETD')">ETD ${getSortIndicator('ETD')}</button></th>
+                <th><button onclick="sortShipments('ETA')">ETA ${getSortIndicator('ETA')}</button></th>
             </tr>
     `;
 
@@ -148,6 +212,13 @@ function displayShipments(page) {
     displayPagination();
 }
 
+function getSortIndicator(column) {
+    if (column === currentSortColumn) {
+        return currentSortOrder === 'asc' ? '▲' : '▼';
+    }
+    return '';
+}
+
 function displayPagination() {
     const totalPages = Math.ceil(allShipments.length / itemsPerPage);
     let paginationHTML = '';
@@ -170,7 +241,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
 
     shipments.forEach(shipment => {
         const bookingNumber = escapeHTML(shipment['Booking Number'] || 'N/A');
-        const blNumber = escapeHTML(shipment['PO Number'] || 'N/A');
+        const poNumber = escapeHTML(shipment['PO Number'] || 'N/A');
         const status = escapeHTML(shipment['Status'] || 'N/A');
         const pol = escapeHTML(shipment['POL'] || 'N/A');
         const pod = escapeHTML(shipment['POD'] || 'N/A');
@@ -186,7 +257,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
             <div>
                 <p><strong>Customer Code:</strong> ${customerCodeDisplay}</p>
                 <p><strong>Booking Number:</strong> ${bookingNumber}</p>
-                <p><strong>PO Number:</strong> ${blNumber}</p>
+                <p><strong>PO Number:</strong> ${poNumber}</p>
                 <p><strong>Status:</strong> ${status}</p>
                 <p><strong>POL:</strong> ${pol}</p>
                 <p><strong>POD:</strong> ${pod}</p>
