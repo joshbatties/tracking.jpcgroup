@@ -69,7 +69,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
             const rows = results.data;
             const headers = results.meta.fields;
 
-            const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'POL', 'POD', 'ETD', 'ETA', 'Customer Code'];
+            const requiredHeaders = ['Container Number', 'Booking Number', 'PO Number', 'Status', 'POL', 'POD', 'ETD', 'ETA', 'Customer Code'];
             const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
             if (missingHeaders.length > 0) {
                 console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
@@ -92,7 +92,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
                     const containerNumbers = normalizeString(row['Container Number']).split(',').map(cn => cn.trim());
                     return containerNumbers.includes(normalizeString(trackingNumber)) ||
                            normalizeString(row['Booking Number']) === normalizeString(trackingNumber) ||
-                           normalizeString(row['B/L Number']) === normalizeString(trackingNumber);
+                           normalizeString(row['PO Number']) === normalizeString(trackingNumber);
                 });
                 if (shipments.length > 0) {
                     displayTrackingInfo(shipments, trackingNumber);
@@ -125,7 +125,7 @@ function displayShipments(page) {
         <table>
             <tr>
                 <th>Booking Number</th>
-                <th>B/L Number</th>
+                <th>PO Number</th>
                 <th>Container Numbers</th>
                 <th>Status</th>
                 <th>POL</th>
@@ -139,7 +139,7 @@ function displayShipments(page) {
         resultHTML += `
             <tr>
                 <td>${escapeHTML(shipment['Booking Number'] || 'N/A')}</td>
-                <td>${escapeHTML(shipment['B/L Number'] || 'N/A')}</td>
+                <td>${escapeHTML(shipment['PO Number'] || 'N/A')}</td>
                 <td>${shipment['Container Number'].split(',').map(cn => escapeHTML(cn.trim())).join('<br>')}</td>
                 <td>${escapeHTML(shipment['Status'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['POL'] || 'N/A')}</td>
@@ -179,7 +179,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
 
     shipments.forEach(shipment => {
         const bookingNumber = escapeHTML(shipment['Booking Number'] || 'N/A');
-        const blNumber = escapeHTML(shipment['B/L Number'] || 'N/A');
+        const blNumber = escapeHTML(shipment['PO Number'] || 'N/A');
         const status = escapeHTML(shipment['Status'] || 'N/A');
         const pol = escapeHTML(shipment['POL'] || 'N/A');
         const pod = escapeHTML(shipment['POD'] || 'N/A');
@@ -195,7 +195,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
             <div>
                 <p><strong>Customer Code:</strong> ${customerCodeDisplay}</p>
                 <p><strong>Booking Number:</strong> ${bookingNumber}</p>
-                <p><strong>Bill of Lading Number:</strong> ${blNumber}</p>
+                <p><strong>PO Number:</strong> ${blNumber}</p>
                 <p><strong>Status:</strong> ${status}</p>
                 <p><strong>POL:</strong> ${pol}</p>
                 <p><strong>POD:</strong> ${pod}</p>
