@@ -69,7 +69,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
             const rows = results.data;
             const headers = results.meta.fields;
 
-            const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'POD', 'ETD', 'ETA', 'Customer Code'];
+            const requiredHeaders = ['Container Number', 'Booking Number', 'B/L Number', 'Status', 'POL', 'POD', 'ETD', 'ETA', 'Customer Code'];
             const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
             if (missingHeaders.length > 0) {
                 console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
@@ -128,6 +128,7 @@ function displayShipments(page) {
                 <th>B/L Number</th>
                 <th>Container Numbers</th>
                 <th>Status</th>
+                <th>POL</th>
                 <th>POD</th>
                 <th>ETD</th>
                 <th>ETA</th>
@@ -141,6 +142,7 @@ function displayShipments(page) {
                 <td>${escapeHTML(shipment['B/L Number'] || 'N/A')}</td>
                 <td>${shipment['Container Number'].split(',').map(cn => escapeHTML(cn.trim())).join('<br>')}</td>
                 <td>${escapeHTML(shipment['Status'] || 'N/A')}</td>
+                <td>${escapeHTML(shipment['POL'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['POD'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['ETD'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['ETA'] || 'N/A')}</td>
@@ -179,6 +181,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
         const bookingNumber = escapeHTML(shipment['Booking Number'] || 'N/A');
         const blNumber = escapeHTML(shipment['B/L Number'] || 'N/A');
         const status = escapeHTML(shipment['Status'] || 'N/A');
+        const pol = escapeHTML(shipment['POL'] || 'N/A');
         const pod = escapeHTML(shipment['POD'] || 'N/A');
         const etd = escapeHTML(shipment['ETD'] || 'N/A');
         const eta = escapeHTML(shipment['ETA'] || 'N/A');
@@ -194,6 +197,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
                 <p><strong>Booking Number:</strong> ${bookingNumber}</p>
                 <p><strong>Bill of Lading Number:</strong> ${blNumber}</p>
                 <p><strong>Status:</strong> ${status}</p>
+                <p><strong>POL:</strong> ${pol}</p>
                 <p><strong>POD:</strong> ${pod}</p>
                 <p><strong>Estimated Time of Departure:</strong> ${etd}</p>
                 <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
