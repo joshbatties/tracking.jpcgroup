@@ -70,7 +70,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
             const rows = results.data;
             const headers = results.meta.fields;
 
-            const requiredHeaders = ['Container Number', 'Booking Number', 'PO Number', 'Status', 'POL', 'POD', 'ETD', 'ETA', 'Customer Code'];
+            const requiredHeaders = ['Container Number', 'Booking Number', 'PO Number', 'Status', 'POL', 'POD', 'ETD', 'ETA', 'Customer Code', 'Delivery Address'];
             const missingHeaders = requiredHeaders.filter(header => !headers.includes(header));
             if (missingHeaders.length > 0) {
                 console.error(`Missing required columns: ${missingHeaders.join(', ')}`);
@@ -205,6 +205,7 @@ function displayShipments(page) {
                 <th><button onclick="sortShipments('POD')">POD ${getSortIndicator('POD')}</button></th>
                 <th><button onclick="sortShipments('ETD')">ETD ${getSortIndicator('ETD')}</button></th>
                 <th><button onclick="sortShipments('ETA')">ETA ${getSortIndicator('ETA')}</button></th>
+                <th><button onclick="sortShipments('Delivery Address')">Delivery Address ${getSortIndicator('Delivery Address')}</button></th>
             </tr>
     `;
 
@@ -219,6 +220,7 @@ function displayShipments(page) {
                 <td>${escapeHTML(shipment['POD'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['ETD'] || 'N/A')}</td>
                 <td>${escapeHTML(shipment['ETA'] || 'N/A')}</td>
+                <td>${escapeHTML(shipment['Delivery Address'] || 'N/A')}</td>
             </tr>
         `;
     });
@@ -266,6 +268,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
         const etd = escapeHTML(shipment['ETD'] || 'N/A');
         const eta = escapeHTML(shipment['ETA'] || 'N/A');
         const customerCodeDisplay = escapeHTML(shipment['Customer Code'] || 'N/A');
+        const deliveryAddress = escapeHTML(shipment['Delivery Address'] || 'N/A');
 
         const containerNumbers = shipment['Container Number'].split(',').map(cn => cn.trim());
         const containerLabel = containerNumbers.length > 1 ? "Container/s" : "Container";
@@ -282,6 +285,7 @@ function displayTrackingInfo(shipments, searchedNumber) {
                 <p><strong>Estimated Time of Departure:</strong> ${etd}</p>
                 <p><strong>Estimated Time of Arrival:</strong> ${eta}</p>
                 <p><strong>${containerLabel}:</strong> ${escapeHTML(containerDisplay)}</p>
+                <p><strong>Delivery Address:</strong> ${deliveryAddress}</p>
             </div>
         `;
     });
