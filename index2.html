@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPC Container Tracking</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ecf0f1;
+        }
+        h1, h2 {
+            color: #2980b9;
+            text-align: center;
+        }
+        form, #trackingResult, #customerSummary {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2980b9;
+            font-size: 1.35rem;
+        }
+        .input-description {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #2980b9;
+            outline: none;
+        }
+        .separator {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        button {
+            background-color: #2980b9;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #1f6391;
+        }
+        #loadingIndicator {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            margin: 0 auto;
+            width: 50px;
+            height: 50px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #2980b9;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #inputError {
+            display: none;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .container-info, .shipment-info {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #pagination button {
+            margin: 0 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            form, #trackingResult, #customerSummary {
+                padding: 15px;
+            }
+        }
+
+        #customerSummary:empty,
+#trackingResult:empty,
+#pagination:empty {
+    display: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px; /* Reduce font size if needed */
+}
+
+th, td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+    word-break: break-word; /* Allow long content to break */
+}
+
+header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#jpc-logo {
+    height: 4em; /* This makes the logo height match the text height */
+    margin-right: 15px; /* Adds some space between the logo and the text */
+}
+
+h1 {
+    color: #2980b9;
+    margin: 0; /* Removes default margins */
+}
+
+.separator {
+    text-align: center;
+    margin: 30px 0;
+    font-weight: bold;
+    color: #7f8c8d;
+    font-size: 1.5em;
+}
+
+.loadingIndicator {
+    display: none;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.spinner {
+    border: 4px solid rgba(41, 128, 185, 0.3); /* Light blue */
+    border-top: 4px solid #2980b9; /* Solid blue */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+th button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    color: #2980b9;
+    font-weight: bold;
+}
+
+th button:hover {
+    text-decoration: underline;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <img src="images/jpc_logo.png" alt="JPC Logo" id="jpc-logo">
+        <h1>Container Tracking</h1>
+    </header>
+    <div id="inputError"></div>
+    <form id="trackingForm" aria-label="Container Tracking Form">
+        <div>
+            <label for="trackingNumber">Enter Container, Booking, or PO Number:</label>
+            <p>Search individual shipments or containers.</p>
+            <input type="text" id="trackingNumber" name="trackingNumber">
+            <button type="button" id="trackShipmentBtn">Track Shipment</button>
+            <div id="trackingResultContainer">
+                <div id="trackingLoadingIndicator" class="loadingIndicator">
+                    <div class="spinner"></div>
+                </div>
+                <div id="trackingResult"></div>
+            </div>
+        </div>
+    
+        <div class="separator">OR</div>
+    
+        <div>
+            <label for="customerCode">Customer Code:</label>
+            <p>Search all your shipments.</p>
+            <input type="text" id="customerCode" name="customerCode">
+            <button type="button" id="searchCustomerBtn">Search</button>
+            <div id="customerResultContainer">
+                <div id="customerLoadingIndicator" class="loadingIndicator">
+                    <div class="spinner"></div>
+                </div>
+                <div id="customerResult"></div>
+            </div>
+        </div>
+    </form>
+    
+    <div id="customerSummary"></div>
+    <div id="pagination"></div>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="script2.js"></script>
+</body>
+</html>
