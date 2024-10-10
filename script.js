@@ -86,7 +86,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
                 );
                 console.log(`Found ${allShipments.length} shipments for customer code ${customerCode}`);
                 if (allShipments.length > 0) {
-                    sortShipments('ETA'); // Initially sort by ETA
+                    sortShipments('ETA'); 
                     displayShipments(1);
                 } else {
                     document.getElementById('customerResult').innerHTML = 'No shipments found for this customer code.';
@@ -120,21 +120,21 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
 
 function parseDate(dateString) {
     if (dateString.toUpperCase() === 'TBA') {
-        return { display: 'TBA', sortValue: new Date(8640000000000000) }; // Max date for sorting
+        return { display: 'TBA', sortValue: new Date(8640000000000000) };
     }
-    // Assuming date format is DD/MM/YYYY
+    // DD/MM/YYYY
     const parts = dateString.split('/');
     if (parts.length === 3) {
-        // Convert to Date object for sorting
+        
         const dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
         if (!isNaN(dateObject)) {
             return { 
-                display: dateString, // Keep original string for display
-                sortValue: dateObject // Use Date object for sorting
+                display: dateString, 
+                sortValue: dateObject
             };
         }
     }
-    return { display: dateString, sortValue: new Date(0) }; // Invalid date, use epoch for sorting
+    return { display: dateString, sortValue: new Date(0) }; 
 }
 
 const statusOrder = [
@@ -148,7 +148,7 @@ const statusOrder = [
 
 function getStatusSortIndex(status) {
     const index = statusOrder.indexOf(status);
-    return index === -1 ? statusOrder.length : index; // Put unknown statuses at the end
+    return index === -1 ? statusOrder.length : index; 
 }
 
 function sortShipments(column) {
