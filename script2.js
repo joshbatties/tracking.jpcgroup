@@ -63,8 +63,13 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
     const url = `${baseUrl}${queryParams}`;
 
     // Fetch data from the Vercel backend API
-    fetch(url, { credentials: 'include' })
-        .then(response => response.json())
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             // Hide the loading spinner
             if (trackingNumber) {
