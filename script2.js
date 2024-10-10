@@ -56,7 +56,7 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
     hideInputError();
 
     // New URL for your Vercel backend
-    const baseUrl = 'https://fetch-cargo-tracking-data-lb52x20fe-joshbatties-projects.vercel.app/api/tracking'; 
+    const baseUrl = 'https://fetch-cargo-tracking-data.vercel.app/api/tracking'; 
     const queryParams = trackingNumber 
         ? `?trackingNumber=${encodeURIComponent(trackingNumber)}` 
         : `?customerCode=${encodeURIComponent(customerCode)}`;
