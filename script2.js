@@ -55,14 +55,14 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
     document.getElementById('pagination').innerHTML = '';
     hideInputError();
 
-    // New URL for your Vercel backend
+
     const baseUrl = 'https://fetch-cargo-tracking-data.vercel.app/api/tracking'; 
     const queryParams = trackingNumber 
         ? `?trackingNumber=${encodeURIComponent(trackingNumber)}` 
         : `?customerCode=${encodeURIComponent(customerCode)}`;
     const url = `${baseUrl}${queryParams}`;
 
-    // Fetch data from the Vercel backend API
+
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -87,7 +87,6 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
             const headers = data.headers;
             const rows = data.data;
 
-            // Process and display the data as before
             if (customerCode) {
                 allShipments = rows;
                 displayShipments(1);
@@ -109,21 +108,21 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
 
 function parseDate(dateString) {
     if (dateString.toUpperCase() === 'TBA') {
-        return { display: 'TBA', sortValue: new Date(8640000000000000) }; // Max date for sorting
+        return { display: 'TBA', sortValue: new Date(8640000000000000) };
     }
-    // Assuming date format is DD/MM/YYYY
+ DD/MM/YYYY
     const parts = dateString.split('/');
     if (parts.length === 3) {
-        // Convert to Date object for sorting
+
         const dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
         if (!isNaN(dateObject)) {
             return { 
-                display: dateString, // Keep original string for display
-                sortValue: dateObject // Use Date object for sorting
+                display: dateString, // for display
+                sortValue: dateObject //  for sorting
             };
         }
     }
-    return { display: dateString, sortValue: new Date(0) }; // Invalid date, use epoch for sorting
+    return { display: dateString, sortValue: new Date(0) };
 }
 
 const statusOrder = [
@@ -137,7 +136,7 @@ const statusOrder = [
 
 function getStatusSortIndex(status) {
     const index = statusOrder.indexOf(status);
-    return index === -1 ? statusOrder.length : index; // Put unknown statuses at the end
+    return index === -1 ? statusOrder.length : index; 
 }
 
 function sortShipments(column) {
