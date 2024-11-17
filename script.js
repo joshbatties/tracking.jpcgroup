@@ -17,6 +17,11 @@ function normalizeString(str) {
     return str ? str.trim().toLowerCase() : '';
 }
 
+function normalizeBookingNumber(bookingNumber) {
+    // Remove 'S' prefix and leading zeros
+    return bookingNumber.replace(/^[sS]0*/, '');
+}
+
 function isValidInput(value) {
     const pattern = /^[a-zA-Z0-9\-]+$/;
     return pattern.test(value.trim());
@@ -40,6 +45,38 @@ function showLoadingIndicator(type) {
 
 function hideLoadingIndicator(type) {
     document.getElementById(type + 'LoadingIndicator').style.display = 'none';
+}
+
+function parseDate(dateString) {
+    if (dateString.toUpperCase() === 'TBA') {
+        return { display: 'TBA', sortValue: new Date(8640000000000000) };
+    }
+    // DD/MM/YYYY
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+        const dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
+        if (!isNaN(dateObject)) {
+            return { 
+                display: dateString, 
+                sortValue: dateObject
+            };
+        }
+    }
+    return { display: dateString, sortValue: new Date(0) }; 
+}
+
+const statusOrder = [
+    "Not ready to ship",
+    "Ready to ship",
+    "On board vessel",
+    "In transit",
+    "Arrived at POD",
+    "Delivered"
+];
+
+function getStatusSortIndex(status) {
+    const index = statusOrder.indexOf(status);
+    return index === -1 ? statusOrder.length : index; 
 }
 
 function fetchTrackingInfo(trackingNumber, customerCode) {
@@ -92,10 +129,13 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
                     document.getElementById('customerResult').innerHTML = 'No shipments found for this customer code.';
                 }
             } else if (trackingNumber) {
+                const normalizedInput = normalizeBookingNumber(trackingNumber);
                 const shipments = rows.filter(row => {
                     const containerNumbers = normalizeString(row['Container Number']).split(',').map(cn => cn.trim());
+                    const normalizedBooking = normalizeBookingNumber(row['Booking Number'] || '');
+                    
                     return containerNumbers.includes(normalizeString(trackingNumber)) ||
-                           normalizeString(row['Booking Number']) === normalizeString(trackingNumber) ||
+                           normalizedBooking === normalizedInput ||
                            normalizeString(row['PO Number']) === normalizeString(trackingNumber);
                 });
                 if (shipments.length > 0) {
@@ -116,39 +156,6 @@ function fetchTrackingInfo(trackingNumber, customerCode) {
             document.getElementById(errorElement).innerHTML = 'An error occurred while fetching tracking information. Please try again later.';
         }
     });
-}
-
-function parseDate(dateString) {
-    if (dateString.toUpperCase() === 'TBA') {
-        return { display: 'TBA', sortValue: new Date(8640000000000000) };
-    }
-    // DD/MM/YYYY
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-        
-        const dateObject = new Date(parts[2], parts[1] - 1, parts[0]);
-        if (!isNaN(dateObject)) {
-            return { 
-                display: dateString, 
-                sortValue: dateObject
-            };
-        }
-    }
-    return { display: dateString, sortValue: new Date(0) }; 
-}
-
-const statusOrder = [
-    "Not ready to ship",
-    "Ready to ship",
-    "On board vessel",
-    "In transit",
-    "Arrived at POD",
-    "Delivered"
-];
-
-function getStatusSortIndex(status) {
-    const index = statusOrder.indexOf(status);
-    return index === -1 ? statusOrder.length : index; 
 }
 
 function sortShipments(column) {
@@ -185,6 +192,13 @@ function sortShipments(column) {
     });
 
     displayShipments(1);
+}
+
+function getSortIndicator(column) {
+    if (column === currentSortColumn) {
+        return currentSortOrder === 'asc' ? '▲' : '▼';
+    }
+    return '';
 }
 
 function displayShipments(page) {
@@ -230,13 +244,6 @@ function displayShipments(page) {
     document.getElementById('customerResult').innerHTML = resultHTML;
 
     displayPagination();
-}
-
-function getSortIndicator(column) {
-    if (column === currentSortColumn) {
-        return currentSortOrder === 'asc' ? '▲' : '▼';
-    }
-    return '';
 }
 
 function displayPagination() {
