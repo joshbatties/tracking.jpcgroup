@@ -36,20 +36,13 @@ const PORT_TRANSLATIONS: Record<string, string> = {
   AUFRE: 'Fremantle'
 };
 
-import notReadyIcon from '../../icons/not-ready-to-ship.svg';
-import readyIcon from '../../icons/ready-to-ship.svg';
-import onboardIcon from '../../icons/on-board-vessel.svg';
-import arrivedIcon from '../../icons/arrived-pod.svg';
-import transitIcon from '../../icons/in-transit.svg';
-import deliveredIcon from '../../icons/delivered.svg';
-
 const STATUS_ICONS: Record<ShipmentStatus, string> = {
-  "Not ready to ship": notReadyIcon,
-  "Ready to ship": readyIcon,
-  "On board vessel": onboardIcon,
-  "Arrived at POD": arrivedIcon,
-  "In transit": transitIcon,
-  "Delivered": deliveredIcon,
+  "Not ready to ship": "icons/not-ready-to-ship.svg",
+  "Ready to ship": "/icons/ready-to-ship.svg",
+  "On board vessel": "/icons/on-board-vessel.svg",
+  "Arrived at POD": "/icons/arrived-pod.svg",
+  "In transit": "/icons/in-transit.svg",
+  "Delivered": "/icons/delivered.svg"
 };
 
 const STATUS_BORDER_HEX: Record<ShipmentStatus, string> = {

@@ -1,8 +1,8 @@
 import React from 'react';
-import logomark from '../../assets/jpc-logomark.svg';
+const logomark = "/icons/jpc-logomark.svg";
 
 const Footer = () => {
-  const watermarkPath = '/container-tracking/icons/jpc-group-watermark.svg';
+  const watermarkPath = '/icons/jpc-group-watermark.svg';
   return (
     <footer className="flex flex-col bg-black relative bg-[image:var(--watermark-bg)] bg-[75%_35%] bg-no-repeat bg-[length:auto_325%]" 
             style={{ 

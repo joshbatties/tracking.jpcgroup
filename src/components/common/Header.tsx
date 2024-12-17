@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../../assets/jpc-logo.png';
+const logo = "/icons/jpc-logo.png";
 
 const Header: React.FC = () => (
   <header className="w-full flex justify-center py-4 px-4">
