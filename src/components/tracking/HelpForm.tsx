@@ -12,7 +12,7 @@ const HelpForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://formsubmit.co/joshbatties@jpcgroup.com', {
+      const response = await fetch('https://formsubmit.co/e21af56276f202ce8918c6c09852f23d', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,6 +33,8 @@ const HelpForm = () => {
           email: '',
           inquiry: ''
         });
+      } else {
+        alert('Failed to send message. Please check your form and try again.');
       }
     } catch (error) {
       alert('Failed to send message. Please try again.');
