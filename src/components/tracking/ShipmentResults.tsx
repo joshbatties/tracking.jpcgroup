@@ -119,7 +119,6 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
 
   return (
     <div className="w-full max-w-2xl lg:max-w-4xl mx-auto font-['Urbanist'] space-y-12">
-      {/* Origin/Destination with adjusted header size and spacing */}
       <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-8 sm:gap-4 p-4 sm:p-0">
         <div className="text-left w-full sm:w-auto">
           <h3 className="text-base sm:text-sm font-medium text-gray-500 mb-1">Origin</h3>
@@ -139,7 +138,6 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Rest of the component remains the same */}
       <div className="relative pt-12 sm:pt-16 scale-90 sm:scale-100 transform origin-top">
         <div className="relative mb-12 sm:mb-16">
           <div className="h-2 bg-gray-200 rounded-full w-full relative"></div>

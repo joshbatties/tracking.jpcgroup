@@ -152,7 +152,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
     return () => clearTimeout(timer);
   }, []);
 
-  // Process the raw data into grouped shipments
   const processedData = useMemo(() => {
     if (!Array.isArray(data) || data.length === 0) return [];
 
@@ -187,7 +186,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
     });
   }, [data, customerCode]);
 
-  // Create mapping of expanded details
   const expandedDetails = useMemo(() => {
     const details = new Map<string, ExpandedDetails>();
     
@@ -209,7 +207,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
     return details;
   }, [data]);
 
-  // Calculate status summary
   const statusSummary = useMemo(() => {
     return processedData.reduce<Partial<Record<ShipmentStatus, number>>>((acc, item) => {
       acc[item.status] = (acc[item.status] || 0) + 1;
@@ -217,11 +214,9 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
     }, {});
   }, [processedData]);
 
-  // Format date display helper
   const formatDateDisplay = (port: string, date: string, isDeparture: boolean): string => {
     const today = new Date();
     
-    // Normalize the year format
     let normalizedDate = date;
     if (date.includes('2024')) {
       normalizedDate = date.replace('2024', '24');
@@ -244,12 +239,12 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
       + `<span class="font-bold">${day}/${month}/${year}</span>`;
   };
 
-  // Format status display helper
+  
   const formatStatus = (status: ShipmentStatus, containers: number): string => {
     return `${containers} container${containers > 1 ? 's' : ''} ${status.toLowerCase()}`;
   };
 
-  // Sort the processed data
+  
   const sortedData = useMemo(() => {
     return [...processedData].sort((a, b) => {
       if (sortColumn === 'destination' && sortDirection === 'asc') {
@@ -312,7 +307,7 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
 
   return (
     <div className="w-full space-y-6">
-      {/* Summary Statistics */}
+      
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
           <div className="flex items-baseline gap-2">
@@ -344,7 +339,7 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
         </div>
       </div>
 
-      {/* Info Popup Container */}
+      
       <div className="h-[44px] relative">
         <AnimatedPopup 
           className={`absolute w-full flex justify-center ${
@@ -357,10 +352,9 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
         </AnimatedPopup>
       </div>
 
-      {/* Results Table */}
+      
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="divide-y divide-gray-200">
-          {/* Desktop Table Header */}
           <div className="hidden sm:grid sm:grid-cols-4 gap-8 px-6 py-4 bg-gray-50">
             {COLUMNS.map(column => (
               <button
@@ -376,7 +370,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
             ))}
           </div>
 
-          {/* Mobile Table Header */}
           <div className="grid sm:hidden grid-cols-4 gap-8 px-6 py-4 bg-gray-50">
             <div className="col-span-2 font-medium text-gray-700">Booking</div>
             <button
@@ -399,11 +392,9 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
             </button>
           </div>
 
-          {/* Table Body */}
           <div className="divide-y divide-gray-200">
             {sortedData.map(item => (
               <React.Fragment key={item.booking}>
-                {/* Mobile Row */}
                 <div 
                   onClick={() => handleRowClick(item.booking)}
                   className="grid sm:hidden grid-cols-4 gap-8 px-6 py-4 hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
@@ -426,7 +417,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
                   }} />
                 </div>
 
-                {/* Desktop Row */}
                 <div 
                   onClick={() => handleRowClick(item.booking)}
                   className="hidden sm:grid grid-cols-4 gap-8 px-6 py-4 hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
@@ -449,7 +439,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
                   }} />
                 </div>
 
-                {/* Expanded Details Row */}
                 {expandedRow === item.booking && expandedDetails.get(item.booking) && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                     <div className="space-y-3">

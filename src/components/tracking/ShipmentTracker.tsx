@@ -104,12 +104,10 @@ const ShipmentTracker: React.FC = () => {
         </div>
 
         <div className="relative transition-all duration-500 ease-in-out">
-  {/* Loading Spinner with Fade */}
   <div className={`transition-all duration-500 ease-in-out ${loading ? 'opacity-100 h-40 mb-12' : 'opacity-0 h-0 overflow-hidden'}`}>
     <LoadingSpinner />
   </div>
 
-  {/* Results with Fade */}
   <div className={`transition-all duration-500 ease-in-out ${!loading && data ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
     {data && isCompanyMode && (
       <div className="w-full mb-8">
