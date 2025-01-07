@@ -3,27 +3,33 @@ import { ChevronDown, ChevronUp, Package, FileText, MapPin } from 'lucide-react'
 import styled from 'styled-components';
 
 const AnimatedPopup = styled.div`
-  @keyframes slideInOut {
+  @keyframes flashAndStay {
     0% {
       opacity: 0;
       transform: translateY(-10px);
     }
-    10% {
+    20% {
       opacity: 1;
       transform: translateY(0);
+      color: rgb(31, 41, 55); /* text-gray-800 equivalent */
     }
-    90% {
-      opacity: 1;
-      transform: translateY(0);
+    40% {
+      color: rgb(107, 114, 128); /* text-gray-500 equivalent */
+    }
+    60% {
+      color: rgb(31, 41, 55); /* text-gray-800 equivalent */
+    }
+    80% {
+      color: rgb(107, 114, 128); /* text-gray-500 equivalent */
     }
     100% {
-      opacity: 0;
-      transform: translateY(-10px);
+      opacity: 1;
+      transform: translateY(0);
+      color: rgb(75, 85, 99); /* text-gray-600 equivalent */
     }
   }
 
-  animation: slideInOut 3s ease-in-out forwards;
-  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  animation: flashAndStay 2s ease-in-out forwards;
 `;
 
 // Types
@@ -142,15 +148,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
   const [sortColumn, setSortColumn] = useState<ColumnType>('destination');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [showInfoPopup, setShowInfoPopup] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowInfoPopup(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const processedData = useMemo(() => {
     if (!Array.isArray(data) || data.length === 0) return [];
@@ -239,12 +236,10 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
       + `<span class="font-bold">${day}/${month}/${year}</span>`;
   };
 
-  
   const formatStatus = (status: ShipmentStatus, containers: number): string => {
     return `${containers} container${containers > 1 ? 's' : ''} ${status.toLowerCase()}`;
   };
 
-  
   const sortedData = useMemo(() => {
     return [...processedData].sort((a, b) => {
       if (sortColumn === 'destination' && sortDirection === 'asc') {
@@ -307,7 +302,6 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
 
   return (
     <div className="w-full space-y-6">
-      
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
           <div className="flex items-baseline gap-2">
@@ -339,20 +333,14 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
         </div>
       </div>
 
-      
       <div className="h-[44px] relative">
-        <AnimatedPopup 
-          className={`absolute w-full flex justify-center ${
-            showInfoPopup ? 'opacity-100 visible' : 'opacity-0 invisible'
-          }`}
-        >
+        <AnimatedPopup className="absolute w-full flex justify-center">
           <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-gray-100">
-            <p className="text-gray-600">Click a row for more information</p>
+            <p>Click a row for more information</p>
           </div>
         </AnimatedPopup>
       </div>
 
-      
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="divide-y divide-gray-200">
           <div className="hidden sm:grid sm:grid-cols-4 gap-8 px-6 py-4 bg-gray-50">
@@ -474,5 +462,4 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
     </div>
   );
 };
-
 export default CompanyResults;
