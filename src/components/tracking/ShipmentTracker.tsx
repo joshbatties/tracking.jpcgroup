@@ -17,6 +17,20 @@ interface TrackingHookReturn {
   clearSearch: () => void;
 }
 
+const normalizeBookingNumber = (input: string): string => {
+  // Remove any whitespace and convert to uppercase
+  const cleaned = input.trim().toUpperCase();
+  
+  // Check if it's in SXXXX format (where X is any character)
+  if (/^S\d{4}$/.test(cleaned)) {
+    // Convert to S0000XXXX format by padding with zeros
+    return `S0000${cleaned.slice(1)}`;
+  }
+  
+  // If it's already in S0000XXXX format or any other format, return as is
+  return cleaned;
+};
+
 const ShipmentTracker: React.FC = () => {
   const [isCompanyMode, setIsCompanyMode] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -27,7 +41,9 @@ const ShipmentTracker: React.FC = () => {
   const handleSearch = useCallback(() => {
     if (!inputValue.trim() || isSearching) return;
   
-    const normalizedInput = inputValue.trim().toUpperCase();
+    const normalizedInput = isCompanyMode 
+      ? inputValue.trim().toUpperCase()
+      : normalizeBookingNumber(inputValue);
     
     const params: TrackingParams = isCompanyMode 
       ? { companyCode: normalizedInput }
@@ -55,7 +71,7 @@ const ShipmentTracker: React.FC = () => {
 
   const placeholderText = isCompanyMode 
     ? "Enter your 9 letter company code" 
-    : "Enter your container, PO or Booking number(s)";
+    : "Enter your container, PO or Booking number";
 
   return (
     <div className="flex-grow flex flex-col items-center pt-16 md:pt-32 pb-64 md:pb-96 px-4 md:px-6 font-['Urbanist']">
@@ -104,28 +120,27 @@ const ShipmentTracker: React.FC = () => {
         </div>
 
         <div className="relative transition-all duration-500 ease-in-out">
-  <div className={`transition-all duration-500 ease-in-out ${loading ? 'opacity-100 h-40 mb-12' : 'opacity-0 h-0 overflow-hidden'}`}>
-    <LoadingSpinner />
-  </div>
+          <div className={`transition-all duration-500 ease-in-out ${loading ? 'opacity-100 h-40 mb-12' : 'opacity-0 h-0 overflow-hidden'}`}>
+            <LoadingSpinner />
+          </div>
 
-  <div className={`transition-all duration-500 ease-in-out ${!loading && data ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-    {data && isCompanyMode && (
-      <div className="w-full mb-8">
-        <CompanyResults 
-          data={data} 
-          customerCode={inputValue}
-        />
-      </div>
-    )}
+          <div className={`transition-all duration-500 ease-in-out ${!loading && data ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+            {data && isCompanyMode && (
+              <div className="w-full mb-8">
+                <CompanyResults 
+                  data={data} 
+                  customerCode={inputValue}
+                />
+              </div>
+            )}
 
-    {data && !isCompanyMode && (
-      <div className="w-full mb-8">
-        <ShipmentResults data={data} />
-      </div>
-    )}
-  </div>
-</div>
-
+            {data && !isCompanyMode && (
+              <div className="w-full mb-8">
+                <ShipmentResults data={data} />
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="flex justify-center space-x-8 mt-8">
           <div className="flex flex-col items-center w-44">
@@ -146,7 +161,7 @@ const ShipmentTracker: React.FC = () => {
             </h2>
             <p className="text-xs text-gray-500 text-center">
               {isCompanyMode ? 
-                "Search by container, PO or Booking number(s)" : 
+                "Search by container, PO or Booking number" : 
                 "See all of your company's shipments"
               }
             </p>
