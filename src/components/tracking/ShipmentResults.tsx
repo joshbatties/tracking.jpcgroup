@@ -46,12 +46,12 @@ const STATUS_ICONS: Record<ShipmentStatus, string> = {
 };
 
 const STATUS_BORDER_HEX: Record<ShipmentStatus, string> = {
-  "Not ready to ship": "#e2e8f0",
-  "Ready to ship": "#fde68a",
-  "On board vessel": "#bfdbfe",
-  "In transit": "#c7d2fe",
-  "Arrived at POD": "#a7f3d0",
-  "Delivered": "#bbf7d0"
+  "Not ready to ship": "#64748b",
+  "Ready to ship": "#ef4444",
+  "On board vessel": "#eab308",
+  "In transit": "#d946ef",
+  "Arrived at POD": "#3b82f6",
+  "Delivered": "#10b981"
 };
 
 function formatDateString(date: string): Date {

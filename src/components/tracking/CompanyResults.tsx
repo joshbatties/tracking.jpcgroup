@@ -109,29 +109,29 @@ const STATUS_COLOR_CLASSES = {
     border: 'border-slate-200'
   },
   'Ready to ship': {
+    bg: 'bg-red-50',
+    text: 'text-red-700',
+    border: 'border-red-200'
+  },
+  'On board vessel': {
     bg: 'bg-yellow-50',
     text: 'text-yellow-700',
     border: 'border-yellow-200'
   },
-  'On board vessel': {
+  'In transit': {
+    bg: 'bg-fuchsia-50',
+    text: 'text-fuchsia-700',
+    border: 'border-fuchsia-200'
+  },
+  'Arrived at POD': {
     bg: 'bg-blue-50',
     text: 'text-blue-700',
     border: 'border-blue-200'
   },
-  'In transit': {
-    bg: 'bg-indigo-50',
-    text: 'text-indigo-700',
-    border: 'border-indigo-200'
-  },
-  'Arrived at POD': {
+  'Delivered': {
     bg: 'bg-emerald-50',
     text: 'text-emerald-700',
     border: 'border-emerald-200'
-  },
-  'Delivered': {
-    bg: 'bg-green-50',
-    text: 'text-green-700',
-    border: 'border-green-200'
   }
 } as const;
 
