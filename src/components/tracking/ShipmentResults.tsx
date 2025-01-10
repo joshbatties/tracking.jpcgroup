@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ShipmentData {
   "Booking Number": string;
@@ -89,6 +89,26 @@ interface ShipmentResultsProps {
 }
 
 const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [progressWidth, setProgressWidth] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Set initial mobile state
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint in Tailwind
+    };
+
+    // Check initial state
+    checkMobile();
+
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8">
@@ -111,11 +131,72 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
   const originInfo = formatOriginOrDestination(pol, etd, true);
   const destinationInfo = formatOriginOrDestination(pod, eta, false);
 
-  const currentIndex = STATUS_LIST.indexOf(status);
+  const finalStepIndex = STATUS_LIST.indexOf(status);
   const totalSteps = STATUS_LIST.length;
-  const filledSegments = currentIndex + 1;
-  const fillPercentage = (filledSegments / totalSteps) * 100;
 
+  useEffect(() => {
+    // Only run animation on desktop
+    if (isMobile) {
+      setCurrentStep(finalStepIndex);
+      setProgressWidth((finalStepIndex / (totalSteps - 1)) * 100);
+      return;
+    }
+
+    setCurrentStep(0);
+    setProgressWidth(0);
+
+    const animateStep = (step: number) => {
+      return new Promise<void>((resolve) => {
+        const startPosition = (step / (totalSteps - 1)) * 100;
+        const endPosition = ((step + 1) / (totalSteps - 1)) * 100;
+        const startTime = Date.now();
+        const duration = 500; // 500ms per step
+
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          // Linear progress between steps
+          const currentWidth = startPosition + (endPosition - startPosition) * progress;
+          setProgressWidth(currentWidth);
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            resolve();
+          }
+        };
+
+        requestAnimationFrame(animate);
+      });
+    };
+
+    const runAnimation = async () => {
+      await new Promise(resolve => setTimeout(resolve, 125)); // Initial delay
+      
+      for (let step = 0; step <= finalStepIndex; step++) {
+        setCurrentStep(step);
+        if (step < finalStepIndex) {
+          await animateStep(step);
+        }
+      }
+    };
+
+    runAnimation();
+  }, [finalStepIndex, totalSteps, isMobile]);
+
+  const getStatusOpacity = (index: number) => {
+    if (isMobile) {
+      // On mobile, only show the final status
+      return index === finalStepIndex ? 1 : 0;
+    }
+    // On desktop, show current step with full opacity
+    return index === currentStep ? 1 : 0.08;
+  };
+
+  const fillPercentage = isMobile 
+    ? (finalStepIndex / (totalSteps - 1)) * 100 
+    : progressWidth;
 
   return (
     <div className="w-full max-w-2xl lg:max-w-4xl mx-auto font-['Urbanist'] space-y-12">
@@ -140,27 +221,50 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
 
       <div className="relative pt-12 sm:pt-16 scale-90 sm:scale-100 transform origin-top">
         <div className="relative mb-12 sm:mb-16">
-          <div className="h-2 bg-gray-200 rounded-full w-full relative"></div>
-          <div 
-            className="h-2 bg-black rounded-full absolute top-0 left-0 transition-all duration-300"
-            style={{ width: `${fillPercentage}%` }}
-          />
-          <img
-            src={STATUS_ICONS[status]}
-            alt={status}
-            className="w-10 h-10 absolute transform -translate-x-1/2"
-            style={{ left: `${fillPercentage}%`, top: '-4rem' }} 
-          />
-          <div 
-            className="absolute font-medium transform -translate-x-1/2 whitespace-nowrap text-sm"
-            style={{ 
-              left: `${fillPercentage}%`, 
-              top: '-1.75rem',
-              color: STATUS_BORDER_HEX[status]
-            }}
-          >
-            {status}
+          <div className="h-2 bg-gray-200 rounded-full w-full relative overflow-hidden">
+            <div 
+              className="h-2 bg-black rounded-full absolute top-0 left-0"
+              style={{ 
+                width: `${fillPercentage}%`,
+                transition: isMobile ? 'none' : undefined
+              }}
+            />
           </div>
+          
+          {STATUS_LIST.map((stepStatus, index) => {
+            const stepPosition = (index / (totalSteps - 1)) * 100;
+            const opacity = getStatusOpacity(index);
+            
+            return (
+              <div
+                key={stepStatus}
+                className="absolute transform -translate-x-1/2 transition-all duration-200"
+                style={{ left: `${stepPosition}%` }}
+              >
+                <img
+                  src={STATUS_ICONS[stepStatus]}
+                  alt={stepStatus}
+                  className="w-10 h-10 absolute top-[-4rem]"
+                  style={{ 
+                    transform: `scale(${opacity > 0.5 ? 1.1 : 0.9})`,
+                    opacity,
+                    display: isMobile && index !== finalStepIndex ? 'none' : undefined
+                  }}
+                />
+                <div 
+                  className="absolute font-medium whitespace-nowrap text-sm"
+                  style={{ 
+                    top: '-1.75rem',
+                    color: STATUS_BORDER_HEX[stepStatus as ShipmentStatus],
+                    opacity,
+                    display: isMobile && index !== finalStepIndex ? 'none' : undefined
+                  }}
+                >
+                  {stepStatus}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

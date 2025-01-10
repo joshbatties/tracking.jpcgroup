@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
+import LoadingSpinner from './LoadingSpinner';
+
+const ThankYouMessage = () => (
+  <div className="text-center space-y-4 py-8">
+    <h3 className="text-4xl font-medium">Thank you for reaching out!</h3>
+    <p className="text-gray-600">Your message has been sent. Please monitor your email, our team will get back to you ASAP.</p>
+  </div>
+);
 
 const HelpForm = () => {
-  const [activeField, setActiveField] = useState<string>('');
+  const [formState, setFormState] = useState('idle'); // 'idle' | 'submitting' | 'submitted'
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -11,6 +19,8 @@ const HelpForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormState('submitting');
+    
     try {
       const response = await fetch('https://formsubmit.co/e21af56276f202ce8918c6c09852f23d', {
         method: 'POST',
@@ -26,7 +36,7 @@ const HelpForm = () => {
       });
       
       if (response.ok) {
-        alert('Message sent successfully! Our team will get back to you shortly.');
+        setFormState('submitted');
         setFormData({
           fullName: '',
           phone: '',
@@ -34,9 +44,11 @@ const HelpForm = () => {
           inquiry: ''
         });
       } else {
+        setFormState('idle');
         alert('Failed to send message. Please check your form and try again.');
       }
     } catch (error) {
+      setFormState('idle');
       alert('Failed to send message. Please try again.');
     }
   };
@@ -53,9 +65,22 @@ const HelpForm = () => {
     border border-gray-200
     focus:border-black`;
 
+  if (formState === 'submitted') {
+    return (
+      <div className="w-full max-w-4xl mx-auto mt-8 bg-white rounded-[32px] shadow-sm border border-gray-200 p-8">
+        <ThankYouMessage />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-4xl mx-auto mt-8 bg-white rounded-[32px] shadow-sm border border-gray-200 p-8">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form 
+        onSubmit={handleSubmit} 
+        className={`space-y-6 transition-opacity duration-300 ${
+          formState === 'submitting' ? 'opacity-50 pointer-events-none' : 'opacity-100'
+        }`}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -63,10 +88,9 @@ const HelpForm = () => {
             placeholder="Full Name"
             required
             className={inputStyles}
-            onFocus={() => setActiveField('fullName')}
-            onBlur={() => setActiveField('')}
             value={formData.fullName}
             onChange={handleChange}
+            disabled={formState === 'submitting'}
           />
           
           <input
@@ -74,10 +98,9 @@ const HelpForm = () => {
             name="phone"
             placeholder="Phone Number (optional)"
             className={inputStyles}
-            onFocus={() => setActiveField('phone')}
-            onBlur={() => setActiveField('')}
             value={formData.phone}
             onChange={handleChange}
+            disabled={formState === 'submitting'}
           />
         </div>
 
@@ -87,10 +110,9 @@ const HelpForm = () => {
           placeholder="Email Address"
           required
           className={inputStyles}
-          onFocus={() => setActiveField('email')}
-          onBlur={() => setActiveField('')}
           value={formData.email}
           onChange={handleChange}
+          disabled={formState === 'submitting'}
         />
 
         <textarea
@@ -103,19 +125,24 @@ const HelpForm = () => {
             border border-gray-200
             focus:border-black
             resize-none`}
-          onFocus={() => setActiveField('inquiry')}
-          onBlur={() => setActiveField('')}
           value={formData.inquiry}
           onChange={handleChange}
+          disabled={formState === 'submitting'}
         />
 
         <div className="flex justify-center pt-2">
-          <button
-            type="submit"
-            className="bg-black text-white px-12 py-3 rounded-full hover:bg-gray-200 hover:text-black transition-all shadow-sm hover:shadow-md"
-          >
-            Send
-          </button>
+          {formState === 'submitting' ? (
+            <div className="py-4">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <button
+              type="submit"
+              className="bg-black text-white px-12 py-3 rounded-full hover:bg-gray-200 hover:text-black transition-all shadow-sm hover:shadow-md"
+            >
+              Send
+            </button>
+          )}
         </div>
       </form>
     </div>
