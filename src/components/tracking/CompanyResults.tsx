@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, Package, FileText, MapPin } from 'lucide-react';
+import { ChevronDown, ChevronUp, Package, FileText, MapPin, Heart } from 'lucide-react';
 import styled from 'styled-components';
 
 const AnimatedPopup = styled.div`
@@ -101,6 +101,12 @@ const PORT_TRANSLATIONS: Record<string, string> = {
   CNXAM: 'Xiamen',
   AUFRE: 'Fremantle'
 };
+
+const COMPANY_NAMES = {
+  'PLUMBAMEL': 'Plumbair',
+  'TILEFFMEL': 'Tile Effect',
+  'ACNATIMEL': 'AC National'
+} as const;
 
 const STATUS_COLOR_CLASSES = {
   'Not ready to ship': {
@@ -459,6 +465,21 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
           </div>
         </div>
       </div>
+      {customerCode && COMPANY_NAMES[customerCode.toUpperCase()] && (
+        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <div className="flex justify-center">
+              <Heart className="text-rose-500" size={28} />
+            </div>
+            <h3 className="text-xl font-medium text-gray-900">
+              Thank you, {COMPANY_NAMES[customerCode.toUpperCase()]}
+            </h3>
+            <p className="text-gray-600">
+              We deeply value our partnership with you and are committed to ensuring your shipments reach their destination safely and on time. Thank you for your continued support.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
