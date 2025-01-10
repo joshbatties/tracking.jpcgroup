@@ -38,11 +38,11 @@ const PORT_TRANSLATIONS: Record<string, string> = {
 
 const STATUS_ICONS: Record<ShipmentStatus, string> = {
   "Not ready to ship": "icons/not-ready-to-ship.svg",
-  "Ready to ship": "/icons/ready-to-ship.svg",
-  "On board vessel": "/icons/on-board-vessel.svg",
-  "Arrived at POD": "/icons/arrived-pod.svg",
-  "In transit": "/icons/in-transit.svg",
-  "Delivered": "/icons/delivered.svg"
+  "Ready to ship": "icons/ready-to-ship.svg",
+  "On board vessel": "icons/on-board-vessel.svg",
+  "Arrived at POD": "icons/arrived-pod.svg",
+  "In transit": "icons/in-transit.svg",
+  "Delivered": "icons/delivered.svg"
 };
 
 const STATUS_BORDER_HEX: Record<ShipmentStatus, string> = {
@@ -94,18 +94,11 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Set initial mobile state
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640); // sm breakpoint in Tailwind
+      setIsMobile(window.innerWidth < 640);
     };
-
-    // Check initial state
     checkMobile();
-
-    // Add resize listener
     window.addEventListener('resize', checkMobile);
-
-    // Cleanup
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -135,7 +128,6 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
   const totalSteps = STATUS_LIST.length;
 
   useEffect(() => {
-    // Only run animation on desktop
     if (isMobile) {
       setCurrentStep(finalStepIndex);
       setProgressWidth((finalStepIndex / (totalSteps - 1)) * 100);
@@ -150,13 +142,11 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
         const startPosition = (step / (totalSteps - 1)) * 100;
         const endPosition = ((step + 1) / (totalSteps - 1)) * 100;
         const startTime = Date.now();
-        const duration = 500; // 500ms per step
+        const duration = 500;
 
         const animate = () => {
           const elapsed = Date.now() - startTime;
           const progress = Math.min(elapsed / duration, 1);
-
-          // Linear progress between steps
           const currentWidth = startPosition + (endPosition - startPosition) * progress;
           setProgressWidth(currentWidth);
 
@@ -172,7 +162,7 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
     };
 
     const runAnimation = async () => {
-      await new Promise(resolve => setTimeout(resolve, 125)); // Initial delay
+      await new Promise(resolve => setTimeout(resolve, 125));
       
       for (let step = 0; step <= finalStepIndex; step++) {
         setCurrentStep(step);
@@ -184,19 +174,6 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
 
     runAnimation();
   }, [finalStepIndex, totalSteps, isMobile]);
-
-  const getStatusOpacity = (index: number) => {
-    if (isMobile) {
-      // On mobile, only show the final status
-      return index === finalStepIndex ? 1 : 0;
-    }
-    // On desktop, show current step with full opacity
-    return index === currentStep ? 1 : 0.08;
-  };
-
-  const fillPercentage = isMobile 
-    ? (finalStepIndex / (totalSteps - 1)) * 100 
-    : progressWidth;
 
   return (
     <div className="w-full max-w-2xl lg:max-w-4xl mx-auto font-['Urbanist'] space-y-12">
@@ -221,43 +198,38 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
 
       <div className="relative pt-12 sm:pt-16 scale-90 sm:scale-100 transform origin-top">
         <div className="relative mb-12 sm:mb-16">
-          <div className="h-2 bg-gray-200 rounded-full w-full relative overflow-hidden">
+          <div className="h-2 bg-gray-200 rounded-full w-full relative">
             <div 
               className="h-2 bg-black rounded-full absolute top-0 left-0"
-              style={{ 
-                width: `${fillPercentage}%`,
-                transition: isMobile ? 'none' : undefined
-              }}
+              style={{ width: `${isMobile ? (finalStepIndex / (totalSteps - 1)) * 100 : progressWidth}%` }}
             />
           </div>
-          
+
           {STATUS_LIST.map((stepStatus, index) => {
             const stepPosition = (index / (totalSteps - 1)) * 100;
-            const opacity = getStatusOpacity(index);
+            const opacity = isMobile 
+              ? (index === finalStepIndex ? 1 : 0)
+              : (index === currentStep ? 1 : 0.08);
             
             return (
-              <div
-                key={stepStatus}
-                className="absolute transform -translate-x-1/2 transition-all duration-200"
-                style={{ left: `${stepPosition}%` }}
-              >
+              <div key={stepStatus}>
                 <img
                   src={STATUS_ICONS[stepStatus]}
                   alt={stepStatus}
-                  className="w-10 h-10 absolute top-[-4rem]"
+                  className="w-10 h-10 absolute transform -translate-x-1/2"
                   style={{ 
-                    transform: `scale(${opacity > 0.5 ? 1.1 : 0.9})`,
-                    opacity,
-                    display: isMobile && index !== finalStepIndex ? 'none' : undefined
+                    left: `${stepPosition}%`, 
+                    top: '-4rem',
+                    opacity: opacity
                   }}
                 />
                 <div 
-                  className="absolute font-medium whitespace-nowrap text-sm"
+                  className="absolute font-medium transform -translate-x-1/2 whitespace-nowrap text-sm"
                   style={{ 
+                    left: `${stepPosition}%`,
                     top: '-1.75rem',
-                    color: STATUS_BORDER_HEX[stepStatus as ShipmentStatus],
-                    opacity,
-                    display: isMobile && index !== finalStepIndex ? 'none' : undefined
+                    color: STATUS_BORDER_HEX[stepStatus],
+                    opacity: opacity
                   }}
                 >
                   {stepStatus}
