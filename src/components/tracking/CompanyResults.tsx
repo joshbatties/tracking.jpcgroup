@@ -93,19 +93,28 @@ const COLUMN_LABELS: Record<ColumnType, string> = {
 
 const PORT_TRANSLATIONS: Record<string, string> = {
   CNNBO: 'Ningbo',
+  CNQIN: 'Qingdao',
+  CNSHK: 'Shekou',
+  CNSZN: 'Shenzhen',
+  CNXAM: 'Xiamen',
+  CNSHG: 'Shanghai',
+  CNYAN: 'Yangshan',
+  CNCAN: 'Guangzhou',
+  CNXAN: 'Xiamen',
+  CNXMN: 'Xiamen',
+  CNDAL: 'Dalian',
+  CNSHA: 'Shanghai',
   AUSYD: 'Sydney',
   AUBNE: 'Brisbane',
   AUMEL: 'Melbourne',
-  CNSHK: 'Shanghai',
-  CNSZN: 'Shenzhen',
-  CNXAM: 'Xiamen',
   AUFRE: 'Fremantle'
 };
 
 const COMPANY_NAMES = {
   'PLUMBAMEL': 'Plumbair',
   'TILEFFMEL': 'Tile Effect',
-  'ACNATIMEL': 'AC National'
+  'ACNATIMEL': 'AC National',
+  'BEFLOOMEL': 'BeFloored'
 } as const;
 
 const STATUS_COLOR_CLASSES = {
