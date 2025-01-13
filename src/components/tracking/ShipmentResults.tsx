@@ -27,12 +27,20 @@ type ShipmentStatus = typeof STATUS_LIST[number];
 
 const PORT_TRANSLATIONS: Record<string, string> = {
   CNNBO: 'Ningbo',
+  CNQIN: 'Qingdao',
+  CNSHK: 'Shekou',
+  CNSZN: 'Shenzhen',
+  CNXAM: 'Xiamen',
+  CNSHG: 'Shanghai',
+  CNYAN: 'Yangshan',
+  CNCAN: 'Guangzhou',
+  CNXAN: 'Xiamen',
+  CNXMN: 'Xiamen',
+  CNDAL: 'Dalian',
+  CNSHA: 'Shanghai',
   AUSYD: 'Sydney',
   AUBNE: 'Brisbane',
   AUMEL: 'Melbourne',
-  CNSHK: 'Shanghai',
-  CNSZN: 'Shenzhen',
-  CNXAM: 'Xiamen',
   AUFRE: 'Fremantle'
 };
 
