@@ -73,7 +73,7 @@ interface ProcessedShipment {
 
 interface ExpandedDetails {
   containers: string[];
-  poNumber: string;
+  poNumbers: string[];
   deliveryAddress: string;
 }
 
@@ -206,12 +206,15 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
       if (!existing) {
         details.set(shipment["Booking Number"], {
           containers: [shipment["Container Number"]],
-          poNumber: shipment["PO Number"],
+          poNumbers: [shipment["PO Number"]], // Changed from poNumber to poNumbers array
           deliveryAddress: shipment["Delivery Address"]
         });
       } else {
         if (!existing.containers.includes(shipment["Container Number"])) {
           existing.containers.push(shipment["Container Number"]);
+        }
+        if (!existing.poNumbers.includes(shipment["PO Number"])) { // Add unique PO Numbers
+          existing.poNumbers.push(shipment["PO Number"]);
         }
       }
     });
@@ -447,20 +450,24 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
                 {expandedRow === item.booking && expandedDetails.get(item.booking) && (
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                     <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Package className="text-gray-400" size={16} />
-                        <span className="font-medium">Containers:</span>
-                        <span className="text-gray-600">
-                          {expandedDetails.get(item.booking)?.containers.join(', ')}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FileText className="text-gray-400" size={16} />
-                        <span className="font-medium">PO Number:</span>
-                        <span className="text-gray-600">
-                          {expandedDetails.get(item.booking)?.poNumber}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Package className="text-gray-400" size={16} />
+                      <span className="font-medium">
+                        Container{expandedDetails.get(item.booking)?.containers.length === 1 ? '' : 's'}:
+                      </span>
+                      <span className="text-gray-600">
+                        {expandedDetails.get(item.booking)?.containers.join(', ')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FileText className="text-gray-400" size={16} />
+                      <span className="font-medium">
+                        PO Number{expandedDetails.get(item.booking)?.poNumbers.length === 1 ? '' : 's'}:
+                      </span>
+                      <span className="text-gray-600">
+                        {expandedDetails.get(item.booking)?.poNumbers.join(', ')}
+                      </span>
+                    </div>
                       <div className="flex items-baseline gap-2">
                         <MapPin className="text-gray-400 mt-1 shrink-0" size={16} />
                         <span className="font-medium">Delivery Address:</span>
