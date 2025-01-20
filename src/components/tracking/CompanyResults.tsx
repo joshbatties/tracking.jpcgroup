@@ -265,8 +265,10 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
           return aDelivered ? 1 : -1;
         }
 
-        const aETA = new Date(a.destination.date);
-        const bETA = new Date(b.destination.date);
+        const [aDay, aMonth, aYear] = a.destination.date.split('/');
+        const [bDay, bMonth, bYear] = b.destination.date.split('/');
+        const aETA = new Date(2000 + parseInt(aYear), parseInt(aMonth) - 1, parseInt(aDay));
+        const bETA = new Date(2000 + parseInt(bYear), parseInt(bMonth) - 1, parseInt(bDay));
         
         if (aDelivered) {
           return bETA.getTime() - aETA.getTime();
