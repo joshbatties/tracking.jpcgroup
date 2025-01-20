@@ -1,10 +1,15 @@
 import React from 'react';
-const logomark = "/icons/jpc-logomark.svg";
 
-const Footer = () => {
+interface FooterProps {
+  className?: string;
+}
+
+const Footer: React.FC<FooterProps> = ({ className = '' }) => {
   const watermarkPath = '/icons/jpc-group-watermark.svg';
+  const logomark = "/icons/jpc-logomark.svg";
+
   return (
-    <footer className="flex flex-col bg-black relative bg-[image:var(--watermark-bg)] bg-[75%_35%] bg-no-repeat bg-[length:auto_325%]" 
+    <footer className={`flex flex-col bg-black relative bg-[image:var(--watermark-bg)] bg-[75%_35%] bg-no-repeat bg-[length:auto_325%] ${className}`}
             style={{ 
               '--watermark-bg': `url(${watermarkPath})`,
               fontFamily: 'Manrope, sans-serif'

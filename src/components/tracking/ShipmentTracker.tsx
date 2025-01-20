@@ -18,10 +18,9 @@ interface TrackingHookReturn {
 }
 
 const normalizeBookingNumber = (input: string): string => {
-  // Remove any whitespace and convert to uppercase
   const cleaned = input.trim().toUpperCase();
   
-  // Check if it's in SXXXX format (where X is any character)
+  // Check if it's in SXXXX format
   if (/^S\d{4}$/.test(cleaned)) {
     // Convert to S0000XXXX format by padding with zeros
     return `S0000${cleaned.slice(1)}`;
@@ -74,12 +73,12 @@ const ShipmentTracker: React.FC = () => {
     : "Enter your container, PO or Booking number";
 
   return (
-    <div className="flex-grow flex flex-col items-center pt-16 md:pt-32 pb-64 md:pb-96 px-4 md:px-6 font-['Urbanist']">
+    <div className="flex-1 flex flex-col items-center pt-16 md:pt-32 px-4 md:px-6 font-['Urbanist'] min-h-0">
       <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 md:mb-12 tracking-tight">
         {isCompanyMode ? 'Track your shipments' : 'Track a shipment'}
       </h1>
 
-      <div className="w-full max-w-2xl lg:max-w-4xl">
+      <div className="w-full max-w-2xl lg:max-w-4xl mb-16">
         <div className="relative mb-8 md:mb-12">
           <div className="flex items-center h-12 md:h-14 rounded-full border border-gray-200 shadow-sm hover:shadow-lg focus-within:shadow-lg pr-2 pl-4 transition-all duration-200">
             <Search className="text-gray-400 w-5 h-5" />
@@ -119,12 +118,12 @@ const ShipmentTracker: React.FC = () => {
           )}
         </div>
 
-        <div className="relative transition-all duration-500 ease-in-out">
+        <div className="relative transition-all duration-500 ease-in-out mb-8">
           <div className={`transition-all duration-500 ease-in-out ${loading ? 'opacity-100 h-40 mb-12' : 'opacity-0 h-0 overflow-hidden'}`}>
             <LoadingSpinner />
           </div>
 
-          <div className={`transition-all duration-500 ease-in-out ${!loading && data ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+          <div className={`transition-all duration-500 ease-in-out ${!loading && data ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
             {data && isCompanyMode && (
               <div className="w-full mb-8">
                 <CompanyResults 
@@ -185,7 +184,7 @@ const ShipmentTracker: React.FC = () => {
           </div>
         </div>
 
-        {showHelpForm && <HelpForm />}
+        {showHelpForm && <div className="mt-8"><HelpForm /></div>}
       </div>
     </div>
   );

@@ -9,9 +9,11 @@ const App: React.FC = () => {
     <HashRouter>
       <div className="min-h-screen flex flex-col">
         <Header />
-        <Routes>
-          <Route path="/" element={<ShipmentTracker />} />
-        </Routes>
+        <main className="flex-1 flex flex-col overflow-auto">
+          <Routes>
+            <Route path="/" element={<ShipmentTracker />} />
+          </Routes>
+        </main>
         <Footer />
       </div>
     </HashRouter>
