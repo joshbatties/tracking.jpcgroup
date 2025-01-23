@@ -231,6 +231,11 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
   }, [processedData]);
 
   const formatDateDisplay = (port: string, date: string, isDeparture: boolean): string => {
+    if (!date || date === 'undefined' || date === 'null') {
+      const cityName = PORT_TRANSLATIONS[port] || port;
+      return `${isDeparture ? 'Departing' : 'Arriving'} <span class="font-bold">${cityName}</span> on <span class="font-bold">TBA</span>`;
+    }
+  
     const today = new Date();
     
     let normalizedDate = date;
@@ -239,10 +244,19 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
     } else if (date.includes('2025')) {
       normalizedDate = date.replace('2025', '25');
     }
-
+  
     const [day, month, year] = normalizedDate.split('/');
+    if (!day || !month || !year) {
+      const cityName = PORT_TRANSLATIONS[port] || port;
+      return `${isDeparture ? 'Departing' : 'Arriving'} <span class="font-bold">${cityName}</span> on <span class="font-bold">TBA</span>`;
+    }
+  
     const shipDate = new Date(parseInt('20' + year), parseInt(month) - 1, parseInt(day));
-
+    if (isNaN(shipDate.getTime())) {
+      const cityName = PORT_TRANSLATIONS[port] || port;
+      return `${isDeparture ? 'Departing' : 'Arriving'} <span class="font-bold">${cityName}</span> on <span class="font-bold">TBA</span>`;
+    }
+  
     const isPast = shipDate < today;
     const cityName = PORT_TRANSLATIONS[port] || port;
     
