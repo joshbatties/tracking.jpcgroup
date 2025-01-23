@@ -114,7 +114,8 @@ const COMPANY_NAMES = {
   'PLUMBAMEL': 'Plumbair',
   'TILEFFMEL': 'Tile Effect',
   'ACNATIMEL': 'AC National',
-  'BEFLOOMEL': 'BeFloored'
+  'BEFLOOMEL': 'BeFloored',
+  'HENNYMEL': 'Henny'
 } as const;
 
 const STATUS_COLOR_CLASSES = {
@@ -206,14 +207,14 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
       if (!existing) {
         details.set(shipment["Booking Number"], {
           containers: [shipment["Container Number"]],
-          poNumbers: [shipment["PO Number"]], // Changed from poNumber to poNumbers array
+          poNumbers: [shipment["PO Number"]],
           deliveryAddress: shipment["Delivery Address"]
         });
       } else {
         if (!existing.containers.includes(shipment["Container Number"])) {
           existing.containers.push(shipment["Container Number"]);
         }
-        if (!existing.poNumbers.includes(shipment["PO Number"])) { // Add unique PO Numbers
+        if (!existing.poNumbers.includes(shipment["PO Number"])) { 
           existing.poNumbers.push(shipment["PO Number"]);
         }
       }

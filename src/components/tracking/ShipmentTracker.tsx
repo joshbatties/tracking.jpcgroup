@@ -20,13 +20,9 @@ interface TrackingHookReturn {
 const normalizeBookingNumber = (input: string): string => {
   const cleaned = input.trim().toUpperCase();
   
-  // Check if it's in SXXXX format
   if (/^S\d{4}$/.test(cleaned)) {
-    // Convert to S0000XXXX format by padding with zeros
     return `S0000${cleaned.slice(1)}`;
   }
-  
-  // If it's already in S0000XXXX format or any other format, return as is
   return cleaned;
 };
 
@@ -69,7 +65,7 @@ const ShipmentTracker: React.FC = () => {
   }, [clearSearch]);
 
   const placeholderText = isCompanyMode 
-    ? "Enter your 9 letter company code" 
+    ? "Enter your company code" 
     : "Enter your container, PO or Booking number";
 
   return (
