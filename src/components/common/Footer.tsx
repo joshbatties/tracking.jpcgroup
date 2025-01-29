@@ -17,24 +17,16 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
       } as React.CSSProperties}
     >
       <div className="flex flex-col md:flex-row items-center gap-8 p-[5vh] px-[5vw]">
-        <div className="relative group">
-          <a 
-            href="https://jpcgroup.com"
-            className="relative float-left w-auto h-[7.5vh] z-[2001] block transition-transform duration-200 ease-in-out group-hover:translate-y-[-4px] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black rounded-lg"
-          >
-            <img
-              src={logomark}
-              alt="JPC Group Logo (White)"
-              className="h-full w-auto align-middle"
-            />
-          </a>
-          <span 
-            className="absolute left-0 w-full text-center text-white opacity-0 transform translate-y-12 transition-all duration-200 ease-in-out group-hover:opacity-100 group-hover:translate-y-14"
-            style={{ fontFamily: 'Urbanist, sans-serif' }}
-          >
-            Back to Home
-          </span>
-        </div>
+        <a 
+          href="https://jpcgroup.com"
+          className="relative float-left w-auto h-[7.5vh] z-[2001] transition-transform duration-200 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black rounded-lg"
+        >
+          <img
+            src={logomark}
+            alt="JPC Group Logo (White)"
+            className="h-full w-auto align-middle"
+          />
+        </a>
         <address className="not-italic">
           <p className="text-[15px] md:text-[0.85rem] leading-[22px] md:leading-[1.25rem] font-medium text-white m-0">
             L16, 1 Collins Street, Melbourne, 3000
