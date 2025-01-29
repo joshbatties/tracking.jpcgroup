@@ -77,7 +77,14 @@ const ShipmentTracker: React.FC = () => {
       <div className="w-full max-w-2xl lg:max-w-4xl mb-16">
         <div className="relative mb-8 md:mb-12">
           <div className="flex items-center h-12 md:h-14 rounded-full border border-gray-200 shadow-sm hover:shadow-lg focus-within:shadow-lg pr-2 pl-4 transition-all duration-200">
-            <Search className="text-gray-400 w-5 h-5" />
+            <button
+              onClick={handleSearch}
+              disabled={loading || !inputValue.trim()}
+              className="text-gray-400 hover:scale-110 transition-transform"
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5" />
+            </button>
             <input
               type="text"
               className="flex-grow px-2 md:px-4 outline-none text-sm md:text-lg"
