@@ -32,7 +32,7 @@ const AnimatedPopup = styled.div`
   animation: flashAndStay 2s ease-in-out forwards;
 `;
 
-// Types
+
 type ColumnType = 'booking' | 'status' | 'origin' | 'destination';
 
 interface ShipmentData {
@@ -115,7 +115,8 @@ const COMPANY_NAMES = {
   'TILEFFMEL': 'Tile Effect',
   'ACNATIMEL': 'AC National',
   'BEFLOOMEL': 'BeFloored',
-  'HENNYMEL': 'Henny'
+  'HENNYMEL': 'Henny',
+  'TESTDEVCO': 'Test Company'
 } as const;
 
 const STATUS_COLOR_CLASSES = {
@@ -269,7 +270,13 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
       + `<span class="font-bold">${day}/${month}/${year}</span>`;
   };
 
-  const formatStatus = (status: ShipmentStatus, containers: number): string => {
+  const formatStatus = (status: ShipmentStatus, containers: number, destination?: { port: string }): string => {
+    if (status === "Arrived at POD" && destination?.port) {
+      const portName = PORT_TRANSLATIONS[destination.port];
+      return portName 
+        ? `${containers} container${containers > 1 ? 's' : ''} arrived at Port of ${portName}`
+        : `${containers} container${containers > 1 ? 's' : ''} arrived at POD`;
+    }
     return `${containers} container${containers > 1 ? 's' : ''} ${status.toLowerCase()}`;
   };
 
@@ -429,7 +436,7 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
                       ${STATUS_COLOR_CLASSES[item.status].text}
                       border ${STATUS_COLOR_CLASSES[item.status].border}`}
                     >
-                      {formatStatus(item.status, item.containers)}
+                      {formatStatus(item.status, item.containers, item.destination)}
                     </span>
                   </div>
                   <div dangerouslySetInnerHTML={{ 
@@ -451,7 +458,7 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
                       ${STATUS_COLOR_CLASSES[item.status].text}
                       border ${STATUS_COLOR_CLASSES[item.status].border}`}
                     >
-                      {formatStatus(item.status, item.containers)}
+                      {formatStatus(item.status, item.containers, item.destination)}
                     </span>
                   </div>
                   <div dangerouslySetInnerHTML={{ 
