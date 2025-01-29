@@ -188,7 +188,7 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
       <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-8 sm:gap-4 p-4 sm:p-0">
         <div className="text-left w-full sm:w-auto">
           <h3 className="text-base sm:text-sm font-medium text-gray-500 mb-1">Origin</h3>
-          <p className="text-2xl sm:text-sm text-gray-900 leading-normal" 
+          <p className="text-xl sm:text-sm text-gray-900 leading-normal" 
              dangerouslySetInnerHTML={{ __html: originInfo.isPast 
                 ? `Departed <span class="font-bold">${PORT_TRANSLATIONS[pol] || pol}</span> on <span class="font-bold">${etd}</span>`
                 : `Departing <span class="font-bold">${PORT_TRANSLATIONS[pol] || pol}</span> on <span class="font-bold">${etd}</span>` }} 
@@ -196,7 +196,7 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
         </div>
         <div className="text-left w-full sm:w-auto sm:text-right">
           <h3 className="text-base sm:text-sm font-medium text-gray-500 mb-1">Destination</h3>
-          <p className="text-2xl sm:text-sm text-gray-900 leading-normal" 
+          <p className="text-xl sm:text-sm text-gray-900 leading-normal" 
              dangerouslySetInnerHTML={{ __html: destinationInfo.isPast
                 ? `Arrived <span class="font-bold">${PORT_TRANSLATIONS[pod] || pod}</span> on <span class="font-bold">${eta}</span>`
                 : `Arriving <span class="font-bold">${PORT_TRANSLATIONS[pod] || pod}</span> on <span class="font-bold">${eta}</span>` }} 
@@ -254,11 +254,15 @@ const ShipmentResults: React.FC<ShipmentResultsProps> = ({ data }) => {
           <span className="text-gray-700">{bookingNumber}</span>
         </div>
         <div>
-          <span className="font-medium">PO Number(s): </span>
+          <span className="font-medium">
+            PO Number{poNumbers.length === 1 ? '' : 's'}: 
+          </span>
           <span className="text-gray-700">{poNumbers.join(', ')}</span>
         </div>
         <div>
-          <span className="font-medium">Container(s): </span>
+          <span className="font-medium">
+            Container{containers.length === 1 ? '' : 's'}: 
+          </span>
           <span className="text-gray-700">{containers.join(', ')}</span>
         </div>
         <div>
