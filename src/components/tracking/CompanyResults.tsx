@@ -168,11 +168,11 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
 
   const processedData = useMemo(() => {
     if (!Array.isArray(data) || data.length === 0) return [];
-
+  
     const filteredData = customerCode 
       ? data.filter(item => item["Customer Code"] === customerCode.toUpperCase())
       : data;
-
+  
     const bookingGroups = filteredData.reduce<Record<string, ShipmentData[]>>((acc, shipment) => {
       const bookingNumber = shipment["Booking Number"];
       if (!acc[bookingNumber]) {
@@ -181,13 +181,15 @@ const CompanyResults: React.FC<CompanyResultsProps> = ({ data = [], customerCode
       acc[bookingNumber].push(shipment);
       return acc;
     }, {});
-
+  
     return Object.entries(bookingGroups).map(([_, shipments]) => {
       const firstShipment = shipments[0];
+      const uniqueContainers = new Set(shipments.map(s => s["Container Number"])).size;
+      
       return {
         booking: firstShipment["Booking Number"],
         status: firstShipment.Status as ShipmentStatus,
-        containers: shipments.length,
+        containers: uniqueContainers, 
         origin: {
           port: firstShipment.POL,
           date: firstShipment.ETD
