@@ -9,16 +9,19 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
   const logomark = "/icons/jpc-logomark.svg";
 
   return (
-    <footer className={`flex flex-col bg-black relative bg-[image:var(--watermark-bg)] bg-[75%_35%] bg-no-repeat bg-[length:auto_325%] ${className}`}
-            style={{ 
-              '--watermark-bg': `url(${watermarkPath})`,
-              fontFamily: 'Manrope, sans-serif'
-            } as React.CSSProperties}>
+    <footer 
+      className={`flex flex-col bg-black relative bg-[image:var(--watermark-bg)] bg-[75%_35%] bg-no-repeat bg-[length:auto_325%] ${className}`}
+      style={{
+        '--watermark-bg': `url(${watermarkPath})`,
+        fontFamily: 'Manrope, sans-serif'
+      } as React.CSSProperties}
+    >
       <div className="flex flex-col md:flex-row items-center gap-8 p-[5vh] px-[5vw]">
-        <a href="#" 
-           aria-current="page" 
-           className="relative float-left w-auto h-[7.5vh] z-[2001]">
-          <img 
+        <a 
+          href="https://jpcgroup.com"
+          className="relative float-left w-auto h-[7.5vh] z-[2001] transition-transform duration-200 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black rounded-lg"
+        >
+          <img
             src={logomark}
             alt="JPC Group Logo (White)"
             className="h-full w-auto align-middle"
