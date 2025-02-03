@@ -117,7 +117,7 @@ const COMPANY_NAMES = {
   'BEFLOOMEL': 'BeFloored',
   'HENNYMEL': 'Henny',
   'TESTDEVCO': 'Test Company',
-  'LEDLIGMEL': 'LED Lightning', 
+  'LEDLIGMEL': 'LED Lighting Group', 
   'MODSCAMEL': 'Modscape'
 } as const;
 
