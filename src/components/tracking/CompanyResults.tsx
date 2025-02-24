@@ -116,7 +116,9 @@ const COMPANY_NAMES = {
   'ACNATIMEL': 'AC National',
   'BEFLOOMEL': 'BeFloored',
   'HENNYMEL': 'Henny',
-  'TESTDEVCO': 'Test Company'
+  'TESTDEVCO': 'Test Company',
+  'LEDLIGMEL': 'LED Lighting Group', 
+  'MODSCAMEL': 'Modscape'
 } as const;
 
 const STATUS_COLOR_CLASSES = {
