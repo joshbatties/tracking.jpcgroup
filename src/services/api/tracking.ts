@@ -3,7 +3,7 @@ import { validateSearchQuery } from '../../utils/validation';
 import type { ShipmentData, TrackingResponse } from '../../types/tracking';
 import type { ApiResponse, TrackingParams } from './types';
 
-const BASE_URL = 'https://test-multi-company-6jpi.vercel.app/api/tracking';
+const BASE_URL = 'https://test-multi-company.vercel.app/api/tracking';
 const rateLimiter = RateLimiter.getInstance();
 
 export class TrackingService {
